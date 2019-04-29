@@ -2,8 +2,8 @@
 /**
  * Enumeration class HypeType - write a description of the enum class here
  * 
- * @author (your name here)
- * @version (version number or date here)
+ * @author Jonathan Fieldsend
+ * @version 29/04/2019
  */
 public enum HypeType
 {

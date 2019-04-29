@@ -1,5 +1,3 @@
-import multiobjective_data_structures.*;
-import multiobjective_data_structures.implementations.*;
 import java.util.ArrayList;
 import java.util.Random; 
 import java.io.File;
@@ -10,36 +8,46 @@ import java.util.ListIterator;
 import java.lang.management.*;
 
 /**
- * Write a description of class Main here.
+ * Main class implements and runs experiments detailed in .
  * 
- * @author (your name) 
- * @version (a version number or a date)
+ * Jonathan E. Fieldsend. 2019. 
+ * Efficient Real-Time Hypervolume Estimation with Monotonically Reducing Error. 
+ * In Genetic and Evolutionary Computa- tion Conference (GECCO ’19), 
+ * July 13–17, 2019, Prague, Czech Republic. ACM, New York, NY, USA, 
+ * 
+ * @author Jonathan Fieldsend
+ * @version 29/04/2019
  */
 public class Main
 {
-    private ThreadMXBean bean = ManagementFactory.getThreadMXBean( );
-
-    private long callCounter=0;
+    private ThreadMXBean bean = ManagementFactory.getThreadMXBean( ); // object to track timings
+    // couple of random number generator instances
     private Random rng = new Random(1L);
     private Random rngMC = new Random(2L);
-
+    // objects for writing out files tracking performance
     private PrintWriter solutionWriter;
     private PrintWriter objectiveWriter;
     private PrintWriter hypervolumeWriter;
     private PrintWriter countWriter;
     private PrintWriter timeWriter;
+    // counters to log progress
+    private long callCounter=0;
     private int hypervolumeSamples = 0;
     private double hypervolume = 0.0;
     private int comparedToArchive = 0;
     private int comparedToSingle = 0;
     private long domCalls = 0;
+    // Lists to store MC samples to process/compare to
     private ArrayList<DTLZSolution> nondominatedList;
     private ArrayList<DTLZSolution> newSolutionList = new ArrayList<>();
     private ArrayList<Integer> processedIndices = new ArrayList<>();
     private DTLZSolution prevChild;
     private int prevProcessedIndex =0;
-    
     boolean updateType = false;
+    
+    /**
+     * Method to run experiments
+     */
     public static void main(String[] args) 
     throws IllegalNumberOfObjectivesException, FileNotFoundException
     {
@@ -80,6 +88,9 @@ public class Main
             (bean.getCurrentThreadCpuTime( ) - bean.getCurrentThreadUserTime( )) : 0L;
     }
 
+    /**
+     * Writes out to a file timeings and archive growth details
+     */
     public void writeSolution(DTLZSolution s,int problem,int numberOfObjectives,int numberOfDesignVariables, int archiveSize, long time) 
     {
         // write solutions
@@ -138,6 +149,9 @@ public class Main
         timeWriter.write(sb.toString());
     }
 
+    /**
+     * Method runs the simple optimiser on the given problem
+     */
     public void runOptimiser(int iterations, int numberOfObjectives, int numberOfDesignVariables, int problem, HypeType t, int fold) 
     throws IllegalNumberOfObjectivesException, FileNotFoundException
     {
@@ -164,6 +178,7 @@ public class Main
         int maxSamples = 5000;
         double[] lowerBound = new double[ numberOfObjectives];
         double[] upperBound = new double[ numberOfObjectives];
+        // set box contstraints for MC sampling of objective vectors
         for (int i=0; i<numberOfObjectives; i++) {
             lowerBound[i] = 0.0;
             upperBound[i] = 2.0;
@@ -196,6 +211,9 @@ public class Main
         timeWriter.close();
     }
 
+    /*
+     * Estimates the hypervolume under different scenarios
+     */
     private void hypervolumeEstimate(ParetoSetManager list, int maxSamples,
     double[] lowerBound, double[] upperBound, DTLZSolution child, HypeType type, long startTime)
     throws IllegalNumberOfObjectivesException 
@@ -203,13 +221,13 @@ public class Main
         long maxTime = 100000L;
         switch (type) {
             case BASIC :
-            hypervolumeBasic(list, maxSamples,lowerBound, upperBound);
+            hypervolumeBasic(list, maxSamples,lowerBound, upperBound); // Doesn't use MC history
             break;
             case INCREMENTAL :
-            hypervolumeIncremental(list, maxSamples,lowerBound, upperBound,child,false);
+            hypervolumeIncremental(list, maxSamples,lowerBound, upperBound,child,false); // Uses MC history
             break;
             case INCREMENTAL_SINGLE :
-            hypervolumeIncremental(list, maxSamples,lowerBound, upperBound,child,true);
+            hypervolumeIncremental(list, maxSamples,lowerBound, upperBound,child,true); //Uses MC history and only compares new instance to non-dominated in history
             break;  
             case DYNAMIC_1 :
             hypervolumeDynamic1(list, lowerBound, upperBound,child, maxTime, startTime); //1ms allowed
@@ -221,6 +239,9 @@ public class Main
 
     }
 
+    /*
+     * 
+     */
     private void hypervolumeDynamic1(ParetoSetManager list, 
     double[] lowerBound, double[] upperBound, DTLZSolution child, long maxTime, long startTime) 
     throws IllegalNumberOfObjectivesException
@@ -228,6 +249,9 @@ public class Main
         process1(startTime,child,list,lowerBound,upperBound,maxTime); 
     }
 
+    /*
+     * 
+     */
     private void process1(long startTime, DTLZSolution child, ParetoSetManager list, 
     double[] lowerBound, double[] upperBound,  long maxTime) 
     throws IllegalNumberOfObjectivesException
@@ -241,7 +265,7 @@ public class Main
                 if (list.weaklyDominates(s)){
                     h++;
                 } else {
-                    nondominatedList.add(s); // record non dominated
+                    nondominatedList.add(s); // record non-dominated
                 }
 
             }
@@ -282,11 +306,13 @@ public class Main
             comparedToArchive = g;
             hypervolumeSamples += h;
             hypervolume = hypervolumeSamples/((double) hypervolumeSamples+ nondominatedList.size());
-            //hypervolumeSamples += h;
             domCalls += callCounter-currentCalls;
         }
     }
 
+    /*
+     * 
+     */
     private void hypervolumeDynamic2(ParetoSetManager list, 
     double[] lowerBound, double[] upperBound, DTLZSolution child, long maxTime, long startTime) 
     throws IllegalNumberOfObjectivesException
@@ -294,6 +320,9 @@ public class Main
         process2(startTime,child,list,lowerBound,upperBound,maxTime); 
     }
 
+    /*
+     * 
+     */
     private void process2(long startTime, DTLZSolution child, ParetoSetManager list, 
     double[] lowerBound, double[] upperBound,  long maxTime) 
     throws IllegalNumberOfObjectivesException
@@ -383,7 +412,8 @@ public class Main
     }
 
     
-    
+    /* LEGACY CODE TO REMOVE
+     
     private void hypervolumeDynamic(ParetoSetManager list, 
     double[] lowerBound, double[] upperBound, DTLZSolution child, long maxTime) 
     throws IllegalNumberOfObjectivesException
@@ -395,7 +425,8 @@ public class Main
         }
         process(startTime,list,lowerBound,upperBound,maxTime); 
     }
-
+  
+     
     private void process(long startTime, ParetoSetManager list, double[] lowerBound, double[] upperBound, long maxTime) 
     throws IllegalNumberOfObjectivesException
     {
@@ -412,11 +443,11 @@ public class Main
                 //System.out.println("N " + newSolutionList.size() + " " + processedIndices.size() + " " + nondominatedList.size() + " i " +i + " index " + index);
                 boolean complete = false;
                 DTLZSolution archiveMember = itrNewSolList.next();
-                /*if (index>=nondominatedList.size()) {
+                //if (index>=nondominatedList.size()) {
                 // special case when last removed in previous step
-                complete = true;
-                } else {
-                 */  ListIterator<DTLZSolution> itr = nondominatedList.listIterator(index);
+                //complete = true;
+                //} else {
+                //   ListIterator<DTLZSolution> itr = nondominatedList.listIterator(index);
                 while (getCPUTime()-startTime < maxTime) {
                     if (itr.hasNext()) {
                         DTLZSolution s  = itr.next();
@@ -472,8 +503,16 @@ public class Main
 
         hypervolumeSamples = hypervolumeSamples+domed;
         hypervolume = hypervolumeSamples/((double) nondominatedList.size()+hypervolumeSamples);
-    }
+    }*/
 
+    /*
+     * Performs incremental hypervolume calculation over time, by maintaining a list
+     * of samples not dominated at previous time steps by the Pareto set estimate.
+     * 
+     * The boolean 'smart' argument indictes whether the maintained list is only compared 
+     * to new members of the archive (which as a (1+1) method is used is the child 
+     * argument, which is null if the Pareto set was not improved in this time step) 
+     */
     private void hypervolumeIncremental(ParetoSetManager list, int maxSamples,
     double[] lowerBound, double[] upperBound, DTLZSolution child, boolean smart) 
     throws IllegalNumberOfObjectivesException
@@ -538,11 +577,16 @@ public class Main
             comparedToArchive = toGenerate+extra;
             hypervolume = (1/((double) maxSamples + hypervolumeSamples)) * (hypervolumeSamples + h);
             hypervolumeSamples += toGenerate;
-            //hypervolumeSamples += h;
             domCalls += callCounter-currentCalls;
         }
     }
 
+    /*
+     * Makes maxSamples random objective vectors in the box constrained space defined
+     * by lowerBound and upperBound, and counts how many are dominated by the Pareto 
+     * Set estimate managed by the list object. Replaces running hypervolume estimate
+     * with this, and tracks other counters
+     */
     private void hypervolumeBasic(ParetoSetManager list, int maxSamples,double[] lowerBound, double[] upperBound) 
     throws IllegalNumberOfObjectivesException
     {
@@ -557,6 +601,9 @@ public class Main
         domCalls += callCounter-currentCalls;
     }
 
+    /*
+     * Evolves arguement to make child returned
+     */
     private DTLZSolution evolve(DTLZSolution s) {
         // select dimension at random
         DTLZSolution child = new DTLZSolution(s);
@@ -570,6 +617,9 @@ public class Main
         return child;
     }
 
+    /*
+     * Method evaluate solutioon argument under either the DTLZ1 or DTLZ2 problem
+     */
     private void evaluate(int problem,DTLZSolution s) {
         if (problem ==1)
             DTLZ1(s);
@@ -577,6 +627,9 @@ public class Main
             DTLZ2(s);
     }
 
+    /*
+     * Method evaluates argument under the DTLZ1 problem
+     */
     private void DTLZ1(DTLZSolution s) {
         double[] f = new double[s.getNumberOfObjectives()];
         double g = 0.0;
@@ -602,6 +655,9 @@ public class Main
             s.setFitness(i, f[i]);
     }
 
+    /*
+     * Method evaluates argument under the DTLZ2 problem
+     */
     private void DTLZ2(DTLZSolution s) {
         double[] f = new double[s.getNumberOfObjectives()];
         double g = 0.0;
@@ -623,11 +679,20 @@ public class Main
             s.setFitness(i, f[i]);
     }
 
+    /*
+     * Inner class representing the Solutions to the DTLZ problems
+     */
     private class DTLZSolution implements Solution {
         private double[] objectives;
 
         double designVariables[];
 
+        /**
+         * Generates an instance of DTLZSolution whose design variables are null
+         * and whose assigned quality is box constrained with the lowerBound and 
+         * upperBound double arrays --- used for Monte Carlo sampling the objective
+         * space
+         */
         DTLZSolution(double[] lowerBound, double[] upperBound){
             objectives = new double[ lowerBound.length ];
             for (int i=0; i<lowerBound.length; i++)
