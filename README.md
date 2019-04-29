@@ -9,9 +9,9 @@ Efficient Real-Time Hypervolume Estimation with Monotonically Reducing Error.
 In Genetic and Evolutionary Computation Conference (GECCO ’19), 
 July 13–17, 2019, Prague, Czech Republic. ACM, New York, NY, USA
 
-Institutional Repository:
+Institutional Repository: http://hdl.handle.net/10871/36825
 
-Publisher DOI
+Publisher DOI: https://doi.org/10.1145/3321707.3321730
 
 The main class for the experiments is the imaginatively titled Main.java
 
