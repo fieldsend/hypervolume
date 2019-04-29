@@ -98,7 +98,7 @@ public class Main
         }
         
         int dim = (problem ==1) ? 5+objs-1 : 10+objs-1; // get the number of design dimensions depending on problem number
-        for (int i=0; i<50; i++) {
+        for (int i=0; i<folds; i++) {
             Main a = new Main();
             a.runOptimiser(its, objs, dim, problem, t, i); 
             System.out.println("FOLD : " + i);
