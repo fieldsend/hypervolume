@@ -17,7 +17,7 @@ The main class for the experiments is the imaginatively titled Main.java
 
 After compliation, running the class without arguments will detail what is expected.
 
-'''
+```
 >> java Main
 
 Not enough input arguments, four arguments expected:
@@ -26,12 +26,12 @@ Not enough input arguments, four arguments expected:
  number of iterations (minimum 0 applied),
  number of objectives (minumum 2 applied) and
  number of folds (minimum 1 appied)
-'''
+```
 
 An example run would be 
 
-'''
+```
 java Main 1 B 1000 4 10
-'''
+```
 
 Which would, use DTLZ2, the basic MC update (here 5000 samples each iteration, will make this adjustable in revisions), for 1000 iterations of the (1+1)-ES, in 4 objective dimensions, for 10 folds.
