@@ -12,7 +12,7 @@ import java.lang.management.*;
  * 
  * Jonathan E. Fieldsend. 2019. 
  * Efficient Real-Time Hypervolume Estimation with Monotonically Reducing Error. 
- * In Genetic and Evolutionary Computa- tion Conference (GECCO ’19), 
+ * In Genetic and Evolutionary Computation Conference (GECCO ’19), 
  * July 13–17, 2019, Prague, Czech Republic. ACM, New York, NY, USA, 
  * 
  * @author Jonathan Fieldsend
@@ -21,7 +21,8 @@ import java.lang.management.*;
 public class Main
 {
     private ThreadMXBean bean = ManagementFactory.getThreadMXBean( ); // object to track timings
-    // couple of random number generator instances
+    // couple of random number generator instances, 
+    // one for design vectors, the other for MC samples
     private Random rng = new Random(1L);
     private Random rngMC = new Random(2L);
     // objects for writing out files tracking performance
@@ -41,9 +42,10 @@ public class Main
     private ArrayList<DTLZSolution> nondominatedList;
     private ArrayList<DTLZSolution> newSolutionList = new ArrayList<>();
     private ArrayList<Integer> processedIndices = new ArrayList<>();
-    private DTLZSolution prevChild;
-    private int prevProcessedIndex =0;
-    boolean updateType = false;
+    
+    // Maximum milliseconds for dynamic approach
+    private long maxTime = 100000L;
+        
     
     /**
      * Method to run experiments
@@ -51,22 +53,55 @@ public class Main
     public static void main(String[] args) 
     throws IllegalNumberOfObjectivesException, FileNotFoundException
     {
-
-        //HypeType t = HypeType.BASIC;
-        //HypeType t = HypeType.INCREMENTAL;
-        //HypeType t = HypeType.INCREMENTAL_SINGLE;
-        //HypeType t = HypeType.DYNAMIC_1;
-        HypeType t = HypeType.DYNAMIC_2;
-        int its  = 100000;
-        int[] objs = {3, 5, 10, 20};
-        int problem = 2;
-
-        for (int o : objs) {   
-            int dim = (problem ==1) ? 5+o-1 : 10+o-1;
-            for (int i=0; i<50; i++) {
-                Main a = new Main();
-                a.runOptimiser(its, o, dim, problem, t, i); 
-            }
+        if (args.length<5) {
+            System.out.println("Not enough input arguments, four arguments expected:\n "
+                    + "DTLZ problem number (1 OR 2),\n Hypervolume estimate update type "
+                    + " (B, I, S OR D),\n number of iterations (minimum 0 applied),\n"
+                    + " number of objectives (minumum 2 applied) and\n"
+                    + " number of folds (minimum 1 appied)\n");
+            return;
+        }
+            
+        System.out.println("Using DTLZ problem " + args[0]);
+        System.out.println("Using hypervolume estimate update type " + args[1]);
+        System.out.println("Running for " + args[2] + " iterations of the (1+1)-ES");
+        System.out.println("Using " + args[3] + " objectives");
+        System.out.println("Using " + args[4] + " folds");
+        
+        HypeType t = null;
+        switch(args[1]) {
+            case "B" :
+            t = HypeType.BASIC;
+            break;
+            case "I" :
+            t = HypeType.INCREMENTAL;
+            break;
+            case "S" :
+            t = HypeType.INCREMENTAL_SINGLE;
+            break;
+            case "D" :
+            t = HypeType.INCREMENTAL_SINGLE;
+        }
+        if (t==null){
+            System.out.println("Using hypervolume update type " + args[1] 
+                                + " is invalid. Use only B, I, S or D" );
+            return;
+        }
+        int its  = Math.max(0,Integer.parseInt(args[2])); // number of iterations of (1+1)-ES
+        int objs = Math.max(2,Integer.parseInt(args[3])); // number of objective dimensions
+        int problem = Integer.parseInt(args[0]); // which problem
+        int folds = Math.max(1,Integer.parseInt(args[4])); // number of folds
+        if ((problem<1) || (problem>2)) {
+            System.out.println("Using DTLZ problem " + args[0] 
+                + " is not a valid selection, only DTLZ1 and DTLZ2 implemented" );
+            return;
+        }
+        
+        int dim = (problem ==1) ? 5+objs-1 : 10+objs-1; // get the number of design dimensions depending on problem number
+        for (int i=0; i<50; i++) {
+            Main a = new Main();
+            a.runOptimiser(its, objs, dim, problem, t, i); 
+            System.out.println("FOLD : " + i);
         }
         System.out.println("COMPLETED");
     }
@@ -155,7 +190,6 @@ public class Main
     public void runOptimiser(int iterations, int numberOfObjectives, int numberOfDesignVariables, int problem, HypeType t, int fold) 
     throws IllegalNumberOfObjectivesException, FileNotFoundException
     {
-        //rng = new Random((long) fold);
         rngMC = new Random((long) fold);
 
         solutionWriter = new PrintWriter(new File("sol_output_p" + problem + "_obj" + numberOfObjectives 
@@ -218,7 +252,6 @@ public class Main
     double[] lowerBound, double[] upperBound, DTLZSolution child, HypeType type, long startTime)
     throws IllegalNumberOfObjectivesException 
     {
-        long maxTime = 100000L;
         switch (type) {
             case BASIC :
             hypervolumeBasic(list, maxSamples,lowerBound, upperBound); // Doesn't use MC history
@@ -229,30 +262,27 @@ public class Main
             case INCREMENTAL_SINGLE :
             hypervolumeIncremental(list, maxSamples,lowerBound, upperBound,child,true); //Uses MC history and only compares new instance to non-dominated in history
             break;  
-            case DYNAMIC_1 :
-            hypervolumeDynamic1(list, lowerBound, upperBound,child, maxTime, startTime); //1ms allowed
-            break; 
-            case DYNAMIC_2 :
-            hypervolumeDynamic2(list, lowerBound, upperBound,child, maxTime, startTime); //1ms allowed
+            case DYNAMIC :
+            hypervolumeDynamic(list, lowerBound, upperBound,child, maxTime, startTime); //1ms allowed
             break; 
         }
 
     }
 
     /*
-     * 
+     * Dynamically allocate time for new samples, based one how much time spent on comparing to old samples
      */
-    private void hypervolumeDynamic1(ParetoSetManager list, 
+    private void hypervolumeDynamic(ParetoSetManager list, 
     double[] lowerBound, double[] upperBound, DTLZSolution child, long maxTime, long startTime) 
     throws IllegalNumberOfObjectivesException
     {
-        process1(startTime,child,list,lowerBound,upperBound,maxTime); 
+        process(startTime,child,list,lowerBound,upperBound,maxTime); 
     }
 
     /*
-     * 
+     * helper processing method for dynamic hypervolume estimation
      */
-    private void process1(long startTime, DTLZSolution child, ParetoSetManager list, 
+    private void process(long startTime, DTLZSolution child, ParetoSetManager list, 
     double[] lowerBound, double[] upperBound,  long maxTime) 
     throws IllegalNumberOfObjectivesException
     {
@@ -310,109 +340,8 @@ public class Main
         }
     }
 
-    /*
-     * 
-     */
-    private void hypervolumeDynamic2(ParetoSetManager list, 
-    double[] lowerBound, double[] upperBound, DTLZSolution child, long maxTime, long startTime) 
-    throws IllegalNumberOfObjectivesException
-    {
-        process2(startTime,child,list,lowerBound,upperBound,maxTime); 
-    }
-
-    /*
-     * 
-     */
-    private void process2(long startTime, DTLZSolution child, ParetoSetManager list, 
-    double[] lowerBound, double[] upperBound,  long maxTime) 
-    throws IllegalNumberOfObjectivesException
-    {
-        long currentCalls = callCounter;
-        if (nondominatedList == null) {
-            nondominatedList = new ArrayList<>(100);
-            int h=0;
-            while (getCPUTime()-startTime < maxTime) {
-                DTLZSolution s = new DTLZSolution(lowerBound, upperBound);
-                if (list.weaklyDominates(s)){
-                    h++;
-                } else {
-                    nondominatedList.add(s); // record non dominated
-                }
-
-            }
-            int g = h+nondominatedList.size();
-            hypervolumeSamples = h;
-            hypervolume = h/((double) g);
-            comparedToArchive = g;
-            domCalls += callCounter-currentCalls;
-            return;
-        } else {
-            int h = 0;
-            comparedToSingle = 0;
-            // are there still elements to process from last iteration
-            if (prevChild != null){
-                ListIterator<DTLZSolution> itr = nondominatedList.listIterator(prevProcessedIndex);
-                comparedToSingle = nondominatedList.size()-prevProcessedIndex;
-                if (itr.hasNext()) {
-                    DTLZSolution s  = itr.next();
-                    if (prevChild.weaklyDominates(s)){ 
-                        h++;
-                        itr.remove(); // clear dominated sample from nonDominatedList
-                    }
-                }
-            }
-            
-            // now see if need to process point to list, and if time permits process
-            if (child != null) {
-                prevProcessedIndex = 0; // track how many processed
-                Iterator<DTLZSolution> itr = nondominatedList.iterator();
-                int toProcess = nondominatedList.size()/2;
-                while (itr.hasNext() && (prevProcessedIndex<toProcess)) {
-                        comparedToSingle++;
-                        prevProcessedIndex++;
-                        DTLZSolution s  = itr.next();
-                        if (child.weaklyDominates(s)){ //only need to compare to child
-                            h++;
-                            itr.remove();
-                        }
-                }
-                while (getCPUTime()-startTime < maxTime) {
-                    while (itr.hasNext()) {
-                        comparedToSingle++;
-                        prevProcessedIndex++;
-                        DTLZSolution s  = itr.next();
-                        if (child.weaklyDominates(s)){ //only need to compare to child
-                            h++;
-                            itr.remove();
-                        }
-                    }
-                }
-            } else {
-                prevChild = null;
-                prevProcessedIndex = 0;
-            }
-            // now do extra if time permits
-            int g=0;
-            while (getCPUTime()-startTime < maxTime) {
-                DTLZSolution s = new DTLZSolution(lowerBound, upperBound);
-                g++;
-                if (list.weaklyDominates(s)){
-                    h++;
-                } else {
-                    nondominatedList.add(s); // record non-dominated
-                }
-            }
-
-            comparedToArchive = g;
-            hypervolumeSamples += h;
-            hypervolume = hypervolumeSamples/((double) hypervolumeSamples+ nondominatedList.size());
-            //hypervolumeSamples += h;
-            domCalls += callCounter-currentCalls;
-        }
-    }
-
     
-    /* LEGACY CODE TO REMOVE
+    /* LEGACY CODE  -- INITIALLY TRIED LIMITING TOTAL TIME, WILL CLEAN UP AT SOME POINT FOR RELEASE, BUT APPROACH NOT RECOMMENDED
      
     private void hypervolumeDynamic(ParetoSetManager list, 
     double[] lowerBound, double[] upperBound, DTLZSolution child, long maxTime) 
