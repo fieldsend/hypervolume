@@ -1,7 +1,7 @@
 # hypervolume
 
 
-Repository holds the code to repoduce thr experiments detailed in:
+Repository holds the code to repoduce the experiments detailed in:
 
 
 Jonathan E. Fieldsend. 2019. 
@@ -35,3 +35,7 @@ java Main 1 B 1000 4 10
 ```
 
 Which would use DTLZ2, the basic MC update (here 5000 samples each iteration, I will make this adjustable in revisions), for 1000 iterations of the (1+1)-ES, in 4 objective dimensions, for 10 folds.
+
+Note, I will be making the codebase a bit more object-oriented in the run-up to GECCO by pulling out the hypervolume estimator functionality into seperate objects to reduce current code duplication, and provide objects directly usable in other projects
+
+
