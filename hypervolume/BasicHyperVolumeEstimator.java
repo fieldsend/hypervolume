@@ -5,14 +5,14 @@
  * @author Jonathan Fieldsend 
  * @version 01/05/2019
  */
-public class BasicHyperVolumeEstimator implements HypervolumeEstimator
+public class BasicHypervolumeEstimator implements HypervolumeEstimator
 {
-    private int numberOfSamples;
-    private ParetoSetManager list;
+    int numberOfSamples;
+    ParetoSetManager list;
     private boolean instrument = false; 
-    private double hypervolume = 0.0; // initially don't dominate any hypervolume 
-    private double[] lowerBounds;
-    private double[] upperBounds;
+    double hypervolume = 0.0; // initially don't dominate any hypervolume 
+    double[] lowerBounds;
+    double[] upperBounds;
     
     /**
      * Generates an instance of BasicHyperVolumeEstimator to track the
@@ -29,7 +29,7 @@ public class BasicHyperVolumeEstimator implements HypervolumeEstimator
      *          not match the number of objectives, or if the number of objectives is 
      *          less than 1 (see message in exception)
      */
-    public BasicHyperVolumeEstimator(int numberOfObjectives, double[] lowerBounds, double[] upperBounds)
+    public BasicHypervolumeEstimator(int numberOfObjectives, double[] lowerBounds, double[] upperBounds)
     throws IllegalNumberOfObjectivesException
     {
         if (numberOfObjectives < 1)

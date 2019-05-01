@@ -1,33 +1,110 @@
+import java.util.ArrayList;
+import java.util.Iterator; 
 
 /**
- * Write a description of class IncrementalHypervolumeEstimator here.
+ * IncrementalHypervolumeEstimator uses past history to incrementally
+ * improve hypervolume estimation over time.
  * 
- * @author (your name) 
- * @version (a version number or a date)
+ * @author Jonathan Fieldsend 
+ * @version 01/05/2019
  */
-public class IncrementalHypervolumeEstimator
+public class IncrementalHypervolumeEstimator extends BasicHypervolumeEstimator
 {
-    // instance variables - replace the example below with your own
-    private int x;
-
+    ArrayList<Solution> nondominatedSamples; // track which samples not yet dominated
+    int hypervolumeSamples = 0; // track how many samples made over time 
     /**
-     * Constructor for objects of class IncrementalHypervolumeEstimator
-     */
-    public IncrementalHypervolumeEstimator()
-    {
-        // initialise instance variables
-        x = 0;
-    }
-
-    /**
-     * An example of a method - replace this comment with your own
+     * Generates an instance of IncrementalHyperVolumeEstimator to track the
+     * hypervolume for a numberOfObjectives dimensional problem, with the
+     * hypervolume estimated by Monte Carlo samples from the box constrained
+     * hyperrectangle defined in objective space by lowerBounds and upperBounds, and
+     * through tracking history of dominated samples 
      * 
-     * @param  y   a sample parameter for a method
-     * @return     the sum of x and y 
+     * Instance initially has instrumentation switched off.
+     * 
+     *  @param numberOfObjectives number of objectives
+     *  @param lowerBounds array of values of lower bound for objectives for MC sampling
+     *  @param upperBounds array of values of upper bound for objectives for MC sampling
+     *  @throws IllegalNumberOfObjectivesException if the length of a bounds array does 
+     *          not match the number of objectives, or if the number of objectives is 
+     *          less than 1 (see message in exception)
      */
-    public int sampleMethod(int y)
+    public IncrementalHypervolumeEstimator(int numberOfObjectives, double[] lowerBounds, double[] upperBounds)
+    throws IllegalNumberOfObjectivesException
     {
-        // put your code here
-        return x + y;
+        super(numberOfObjectives,lowerBounds,upperBounds);
     }
+
+    /**
+     * Uses past dominated history and list of non-dominated samples to incrementally
+     * improve fidelity of hypervolume estimate over time
+     */
+    public double getNewHypervolumeEstimate()
+    throws IllegalNumberOfObjectivesException
+    {
+        if (nondominatedSamples == null)  // first time called, special case
+            return updateFirstTime();
+        int toGenerate = Math.max(0,numberOfSamples-nondominatedSamples.size()); // calculate beforehand, as list may change
+        int h = compareToStoredList();
+        h += generateNewMCSamples(toGenerate); // now generate new MC samples up to limit
+        
+        hypervolume = (1/((double) numberOfSamples + hypervolumeSamples)) * (hypervolumeSamples + h);
+        hypervolumeSamples += toGenerate;
+        return hypervolume;
+    }
+
+    /**
+     * Compares the previously non-dominated solutions to the current
+     * Pareto set estimate, return the number dominated (removed from 
+     * the sample list)
+     */
+    private int compareToStoredList() 
+    throws IllegalNumberOfObjectivesException
+    {
+        int numberDominated = 0;
+        // first iterate over samples which haven't been dominated in pervious iterations
+        Iterator<Solution> itr = nondominatedSamples.iterator();
+        while (itr.hasNext()) {
+            Solution s  = itr.next();
+            if (list.weaklyDominates(s)){ 
+                numberDominated++;
+                itr.remove();
+            }
+        }
+        return numberDominated;
+    }
+    
+    /**
+     * Generates toGenerate number Monte Carlo samples, and returns the
+     * number dominated (with those not dominated added to the list of samples
+     * nont dominated)
+     */
+    int generateNewMCSamples(int toGenerate) 
+    throws IllegalNumberOfObjectivesException
+    {
+        int numberDominated = 0;
+        for (int i=0; i<toGenerate; i++){
+            MonteCarloSolution s = new MonteCarloSolution(lowerBounds, upperBounds);
+            if (list.weaklyDominates(s)){
+                numberDominated++;
+            } else {
+                nondominatedSamples.add(s); // record non-dominated
+            }
+        }
+        return numberDominated;
+    }
+    
+    
+    /**
+     * Calculates hypervolume on first occasion
+     */
+    double updateFirstTime()
+    throws IllegalNumberOfObjectivesException
+    {
+        nondominatedSamples = new ArrayList<>(numberOfSamples); // initial max list length is simply number of samples in an iteration
+        int h = generateNewMCSamples(numberOfSamples);
+        hypervolumeSamples = numberOfSamples-nondominatedSamples.size();
+        hypervolume = h/(double) numberOfSamples;    
+        return hypervolume;
+    }
+
 }

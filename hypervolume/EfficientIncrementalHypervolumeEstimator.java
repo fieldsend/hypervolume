@@ -1,33 +1,71 @@
+import java.util.Iterator; 
 
 /**
- * Write a description of class EfficientIncrementalHypervolumeEstimator here.
+ * EfficientIncrementalHypervolumeEstimator uses past history to incrementally
+ * improve hypervolume estimation over time, and is smart in terms of comparing
+ * previously non-dominated samples only to new entrants to the archive.
  * 
- * @author (your name) 
- * @version (a version number or a date)
+ * @author Jonathan Fieldsend 
+ * @version 01/05/2019
  */
-public class EfficientIncrementalHypervolumeEstimator
+public class EfficientIncrementalHypervolumeEstimator extends IncrementalHypervolumeEstimator
 {
-    // instance variables - replace the example below with your own
-    private int x;
-
-    /**
-     * Constructor for objects of class EfficientIncrementalHypervolumeEstimator
-     */
-    public EfficientIncrementalHypervolumeEstimator()
+    private Solution improvingEntrant; // track if last entrant was improving
+    
+    public EfficientIncrementalHypervolumeEstimator(int numberOfObjectives, double[] lowerBounds, double[] upperBounds)
+    throws IllegalNumberOfObjectivesException
     {
-        // initialise instance variables
-        x = 0;
+        super(numberOfObjectives,lowerBounds,upperBounds);
     }
-
-    /**
-     * An example of a method - replace this comment with your own
-     * 
-     * @param  y   a sample parameter for a method
-     * @return     the sum of x and y 
-     */
-    public int sampleMethod(int y)
+    
+    public double getNewHypervolumeEstimate()
+    throws IllegalNumberOfObjectivesException
     {
-        // put your code here
-        return x + y;
+        if (nondominatedSamples == null)  // first time called, special case
+            return updateFirstTime();
+        int toGenerate = Math.max(0,numberOfSamples-nondominatedSamples.size()); // calculate beforehand, as list may change
+        int h = compareToStoredList();
+        h += generateNewMCSamples(toGenerate); // now generate new MC samples up to limit
+        
+        hypervolume = (1/((double) numberOfSamples + hypervolumeSamples)) * (hypervolumeSamples + h);
+        hypervolumeSamples += toGenerate;
+        return hypervolume;
     }
+    
+    /**
+     * Compares the previously non-dominated solutions to the current
+     * Pareto set estimate, return the number dominated (removed from 
+     * the sample list)
+     */
+    private int compareToStoredList() 
+    throws IllegalNumberOfObjectivesException
+    {
+        int numberDominated = 0;
+        if (improvingEntrant != null) {
+            // first iterate over samples which haven't been dominated in pervious iterations
+            Iterator<Solution> itr = nondominatedSamples.iterator();
+            while (itr.hasNext()) {
+                Solution s  = itr.next();
+                if (improvingEntrant.weaklyDominates(s)){ 
+                    numberDominated++;
+                    itr.remove();
+                }
+            }
+        }
+        return numberDominated;
+    }
+    
+    public boolean updateWithNewSolution(Solution s)
+    throws IllegalNumberOfObjectivesException
+    {
+        // want to track if new solution improves the Pareto set estimate,
+        // for use in efficient hypervolume calculation
+        boolean improvement = super.updateWithNewSolution(s);
+        if (improvement)
+            improvingEntrant = s;
+        else
+            improvingEntrant = null;
+        return improvement;    
+    }
+    
 }
