@@ -16,7 +16,7 @@ public interface HypervolumeEstimator
     /**
      * Method sets number of time limit per iteration
      */
-    void setTimeLimt(long milliseconds) throws UnsupportedOperationException;
+    void setTimeLimit(long nanoseconds) throws UnsupportedOperationException;
     
     /**
      * Method updates the Pareto set estimate managed by the hypervolume

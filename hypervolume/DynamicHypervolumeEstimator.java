@@ -1,33 +1,90 @@
+import java.lang.management.ThreadMXBean;
+import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
+import java.util.Iterator; 
 
 /**
- * Write a description of class DynamicHypervolumeEstimator here.
+ * DynamicHypervolumeEstimator uses past history to incrementally
+ * improve hypervolume estimation over time, and is smart in terms of comparing
+ * previously non-dominated samples only to new entrants to the archive.
  * 
- * @author (your name) 
- * @version (a version number or a date)
+ * After comparing new Archive entrants to those samples previously non-dominated, 
+ * it then checks how much time it has remaining to perform new samples and comparisons
+ * and conducts these until the limit is reached
+ * 
+ * @author Jonathan Fieldsend 
+ * @version 02/05/2019
  */
-public class DynamicHypervolumeEstimator
+public class DynamicHypervolumeEstimator extends EfficientIncrementalHypervolumeEstimator
 {
-    // instance variables - replace the example below with your own
-    private int x;
-
-    /**
-     * Constructor for objects of class DynamicHypervolumeEstimator
-     */
-    public DynamicHypervolumeEstimator()
+    private long nanoseconds = 0; // maximum number of time spent on _new_ MC samples
+    private ThreadMXBean bean = ManagementFactory.getThreadMXBean( ); // object to track timings
+    
+    public DynamicHypervolumeEstimator(int numberOfObjectives, double[] lowerBounds, double[] upperBounds)
+    throws IllegalNumberOfObjectivesException
     {
-        // initialise instance variables
-        x = 0;
+        super(numberOfObjectives,lowerBounds,upperBounds);
     }
-
-    /**
-     * An example of a method - replace this comment with your own
-     * 
-     * @param  y   a sample parameter for a method
-     * @return     the sum of x and y 
-     */
-    public int sampleMethod(int y)
+    
+    @Override
+    public void setNumberOfSamplesToComparePerIteration(int numberOfSamples) 
+    throws UnsupportedOperationException
     {
-        // put your code here
-        return x + y;
+        throw new UnsupportedOperationException("DynamicHyperVolumeEstimators are defined in terms of max new sample time, not number of samples");
     }
+    
+    @Override
+    public void setTimeLimit(long nanoseconds) 
+    throws UnsupportedOperationException
+    {
+        this.nanoseconds = nanoseconds;
+    }
+    
+    @Override
+    public double getNewHypervolumeEstimate()
+    throws IllegalNumberOfObjectivesException
+    {
+        long startTime = getCPUTime();
+        if (nondominatedSamples == null) 
+            return updateFirstTime(startTime);
+        // not first time, so need to compare new entrant to archive  
+        int h = compareToStoredListEfficient();
+        h += generateNewMCSamples(startTime,nanoseconds); // now generate new MC samples up to time limit
+        
+        hypervolumeSamples += h;
+        hypervolume = hypervolumeSamples/((double) hypervolumeSamples + nondominatedSamples.size());
+        return hypervolume;
+    }
+    
+    /* Get CPU time in nanoseconds. */
+    private long getCPUTime( ) {
+        return bean.getCurrentThreadCpuTime( );
+    }
+    
+    private double updateFirstTime(long startTime)
+    throws IllegalNumberOfObjectivesException
+    {
+        nondominatedSamples = new ArrayList<>(100); // initial max list length is arbitrary
+        int h = generateNewMCSamples(startTime,nanoseconds);
+        hypervolumeSamples = h;
+        hypervolume = h/(double) (h+nondominatedSamples.size());    
+        return hypervolume;
+    }
+    
+    private int generateNewMCSamples(long startTime, long nanoseconds) 
+    throws IllegalNumberOfObjectivesException
+    {
+        int numberDominated = 0;
+        while (getCPUTime()-startTime < nanoseconds){
+            MonteCarloSolution s = new MonteCarloSolution(lowerBounds, upperBounds);
+            if (list.weaklyDominates(s)){
+                numberDominated++;
+            } else {
+                nondominatedSamples.add(s); // record non-dominated
+            }
+        }
+        return numberDominated;
+    }
+    
+    
 }

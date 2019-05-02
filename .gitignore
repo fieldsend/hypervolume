@@ -5,3 +5,8 @@ datastructures.jar
 *.ctxt
 *.bluej
 hypervolume/README.TXT
+*.html
+*.txt
+hypervolume/doc/package-list
+*.gif
+*.css

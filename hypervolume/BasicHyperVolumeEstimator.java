@@ -53,7 +53,7 @@ public class BasicHypervolumeEstimator implements HypervolumeEstimator
     }
     
     @Override
-    public void setTimeLimt(long milliseconds) 
+    public void setTimeLimit(long nanoseconds) 
     throws UnsupportedOperationException
     {
         throw new UnsupportedOperationException("BasicHyperVolumeEstimators are defined in terms of samples per iteration, not time");

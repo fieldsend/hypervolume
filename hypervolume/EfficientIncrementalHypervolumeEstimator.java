@@ -25,7 +25,7 @@ public class EfficientIncrementalHypervolumeEstimator extends IncrementalHypervo
         if (nondominatedSamples == null)  // first time called, special case
             return updateFirstTime();
         int toGenerate = Math.max(0,numberOfSamples-nondominatedSamples.size()); // calculate beforehand, as list may change
-        int h = compareToStoredList();
+        int h = compareToStoredListEfficient();
         h += generateNewMCSamples(toGenerate); // now generate new MC samples up to limit
         
         hypervolume = (1/((double) numberOfSamples + hypervolumeSamples)) * (hypervolumeSamples + h);
@@ -38,7 +38,7 @@ public class EfficientIncrementalHypervolumeEstimator extends IncrementalHypervo
      * Pareto set estimate, return the number dominated (removed from 
      * the sample list)
      */
-    private int compareToStoredList() 
+    int compareToStoredListEfficient() 
     throws IllegalNumberOfObjectivesException
     {
         int numberDominated = 0;
