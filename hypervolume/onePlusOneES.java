@@ -7,7 +7,7 @@ import java.lang.management.ThreadMXBean;
  * @author Jonathan Fieldsend
  * @version 02/05/2019
  */
-public class onePlusOneES
+public class OnePlusOneES
 {
     private Random rng;
     private ThreadMXBean bean = ManagementFactory.getThreadMXBean( ); // object to track timings
@@ -15,7 +15,7 @@ public class onePlusOneES
     /**
      * Creates an optimiser instance to run
      */
-    onePlusOneES(long seed) 
+    OnePlusOneES(long seed) 
     {
         rng = new Random(seed);
     }
