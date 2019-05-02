@@ -3,16 +3,17 @@
  * BasicHyperVolumeEstimator.
  * 
  * @author Jonathan Fieldsend 
- * @version 01/05/2019
+ * @version 02/05/2019
  */
 public class BasicHypervolumeEstimator implements HypervolumeEstimator
 {
-    int numberOfSamples;
+    int numberOfSamples; //number of MC samples to take at each query
     ParetoSetManager list;
     private boolean instrument = false; 
     double hypervolume = 0.0; // initially don't dominate any hypervolume 
     double[] lowerBounds;
     double[] upperBounds;
+    String filename;
     
     /**
      * Generates an instance of BasicHyperVolumeEstimator to track the
@@ -44,24 +45,28 @@ public class BasicHypervolumeEstimator implements HypervolumeEstimator
     }
     
     
+    @Override
     public void setNumberOfSamplesToComparePerIteration(int numberOfSamples) 
     throws UnsupportedOperationException
     {
         this.numberOfSamples = numberOfSamples;
     }
     
+    @Override
     public void setTimeLimt(long milliseconds) 
     throws UnsupportedOperationException
     {
         throw new UnsupportedOperationException("BasicHyperVolumeEstimators are defined in terms of samples per iteration, not time");
     }
     
+    @Override
     public boolean updateWithNewSolution(Solution s)
     throws IllegalNumberOfObjectivesException
     {
         return list.add(s);
     }
     
+    @Override
     public double getNewHypervolumeEstimate()
     throws IllegalNumberOfObjectivesException
     {
@@ -73,36 +78,47 @@ public class BasicHypervolumeEstimator implements HypervolumeEstimator
         return hypervolume;
     }
     
+    @Override
     public double getCurrentHypervolumeEstimate()
     {
         return hypervolume;
     }
     
+    @Override
     public ParetoSetManager getCurrentParetoSetEstimate()
     {
         return list;
     }
     
+    @Override
     public void setInstrumented(boolean instrument)
     {
         // if switching instrumentation off, and currently on, then write to file before changing state 
         if (instrument==false) {
-            this.writeOutFiles();
+            this.writeOutFiles(filename);
         }
         this.instrument = instrument;
     }
     
+    @Override
     public boolean isInstrumented()
     {
         return instrument;
     }
     
-    public boolean writeOutFiles()
+    @Override
+    public boolean writeOutFiles(String filename)
     {
+        this.filename = filename;
         if (instrument == false)
             return false;
-            
-            
-        return true;
+        throw new RuntimeException("writeOutFiles() method still to be implemented");    
+        
+    }
+    
+    @Override
+    public int getNumberOfSamplesUsedForCurrentEstimate()
+    {
+        return numberOfSamples;
     }
 }

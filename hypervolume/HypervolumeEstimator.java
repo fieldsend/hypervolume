@@ -4,7 +4,7 @@
  * estimation objects.
  * 
  * @author Jonathan Fieldsend 
- * @version 01/05/2019
+ * @version 02/05/2019
  */
 public interface HypervolumeEstimator
 {
@@ -56,5 +56,11 @@ public interface HypervolumeEstimator
      * Writes out files tracking statistics. Returns true if successful. Will return false
      * if instrumentation not set to true.
      */
-    boolean writeOutFiles();
+    boolean writeOutFiles(String filename);
+    
+    /**
+     * Returns the number of Monte Carlo samples used to create current estimate of the
+     * dominated hypervolume
+     */
+    int getNumberOfSamplesUsedForCurrentEstimate();
 }

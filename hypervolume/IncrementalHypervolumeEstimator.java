@@ -6,7 +6,7 @@ import java.util.Iterator;
  * improve hypervolume estimation over time.
  * 
  * @author Jonathan Fieldsend 
- * @version 01/05/2019
+ * @version 02/05/2019
  */
 public class IncrementalHypervolumeEstimator extends BasicHypervolumeEstimator
 {
@@ -38,6 +38,7 @@ public class IncrementalHypervolumeEstimator extends BasicHypervolumeEstimator
      * Uses past dominated history and list of non-dominated samples to incrementally
      * improve fidelity of hypervolume estimate over time
      */
+    @Override
     public double getNewHypervolumeEstimate()
     throws IllegalNumberOfObjectivesException
     {
@@ -52,6 +53,13 @@ public class IncrementalHypervolumeEstimator extends BasicHypervolumeEstimator
         return hypervolume;
     }
 
+    @Override
+    public int getNumberOfSamplesUsedForCurrentEstimate()
+    {
+        return numberOfSamples + numberOfSamples;
+    }
+    
+    
     /**
      * Compares the previously non-dominated solutions to the current
      * Pareto set estimate, return the number dominated (removed from 

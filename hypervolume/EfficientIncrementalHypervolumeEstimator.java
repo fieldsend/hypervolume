@@ -6,7 +6,7 @@ import java.util.Iterator;
  * previously non-dominated samples only to new entrants to the archive.
  * 
  * @author Jonathan Fieldsend 
- * @version 01/05/2019
+ * @version 02/05/2019
  */
 public class EfficientIncrementalHypervolumeEstimator extends IncrementalHypervolumeEstimator
 {
@@ -18,6 +18,7 @@ public class EfficientIncrementalHypervolumeEstimator extends IncrementalHypervo
         super(numberOfObjectives,lowerBounds,upperBounds);
     }
     
+    @Override
     public double getNewHypervolumeEstimate()
     throws IllegalNumberOfObjectivesException
     {
