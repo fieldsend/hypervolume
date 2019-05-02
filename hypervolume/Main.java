@@ -43,7 +43,7 @@ public class Main
     private ArrayList<DTLZSolution> newSolutionList = new ArrayList<>();
     private ArrayList<Integer> processedIndices = new ArrayList<>();
     
-    // Maximum milliseconds for dynamic approach
+    // Maximum nanoseconds for dynamic approach
     private long maxTime = 100000L;
         
     
