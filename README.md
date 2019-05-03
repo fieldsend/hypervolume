@@ -57,5 +57,5 @@ For more general use, the class functions required are the implementors of the
 HypervolumeEstimator interface. In terms of computational efficiency, the real choice
 is between the EfficientIncrementalHypervolumeEstimator class (which limits the number 
 of MC samples to use to refine the estimate each generation) and DynamicHypervolumeEstimator
-which has a ceiling on time spent _after_ perviously non-dominated MC samples are re-checked
+which has a ceiling on time spent _after_ previously non-dominated MC samples are re-checked
 if the estimated Pareto set has changed
