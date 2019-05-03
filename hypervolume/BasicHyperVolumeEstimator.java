@@ -13,7 +13,6 @@ public class BasicHypervolumeEstimator implements HypervolumeEstimator
 {
     int numberOfSamples; //number of MC samples to take at each query
     ParetoSetManager list;
-    private boolean instrumented = false; 
     double hypervolume = 0.0; // initially don't dominate any hypervolume 
     double[] lowerBounds;
     double[] upperBounds;
@@ -118,12 +117,9 @@ public class BasicHypervolumeEstimator implements HypervolumeEstimator
     }
     
     @Override
-    public boolean writeOutHypervolume()
+    public void writeOutHypervolume()
     throws FileNotFoundException
     {
-        if (instrumented == false)
-            return false;
-     
         PrintWriter hypervolumeWriter = new PrintWriter(new File(hypervolumeFilename));
             
         StringBuilder sb = new StringBuilder();
@@ -136,16 +132,12 @@ public class BasicHypervolumeEstimator implements HypervolumeEstimator
         
         // reset tracker
         hypervolumeHistory = new ArrayList<>();
-        return true;
     }
     
     @Override
-    public boolean writeOutTimeInNanoseconds()
+    public void writeOutTimeInNanoseconds()
     throws FileNotFoundException
     {
-        if (instrumented == false)
-            return false;
-     
         PrintWriter timeWriter = new PrintWriter(new File(timeFilename));
             
         StringBuilder sb = new StringBuilder();
@@ -158,7 +150,6 @@ public class BasicHypervolumeEstimator implements HypervolumeEstimator
         
         // reset tracker
         hypervolumeTimingHistoryInNanoseconds  = new ArrayList<>();
-        return true;
     }
     
     @Override

@@ -61,17 +61,15 @@ public interface HypervolumeEstimator
     ParetoSetManager getCurrentParetoSetEstimate();
     
     /**
-     * Writes out file tracking hypervolume statistic. Returns true if successful. Will return false
-     * if instrumentation not set to true. Once written out the state tracking object will be reset.
+     * Writes out file tracking hypervolume statistic. Once written out the state tracking object will be reset.
      */
-    boolean writeOutHypervolume() throws FileNotFoundException;
+    void writeOutHypervolume() throws FileNotFoundException;
     
     /**
      * Writes out file tracking timings in nanoseconds for computing the hypervolume estimate.
-     * Returns true if successful. Will return false
-     * if instrumentation not set to true. Once written out the state tracking object will be reset.
+     * Once written out the state tracking object will be reset.
      */
-    boolean writeOutTimeInNanoseconds() throws FileNotFoundException;
+    void writeOutTimeInNanoseconds() throws FileNotFoundException;
     
     /**
      * Returns the number of Monte Carlo samples used to create current estimate of the

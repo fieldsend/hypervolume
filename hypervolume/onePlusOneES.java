@@ -40,7 +40,7 @@ public class OnePlusOneES
             evaluate(problem,child);
             if (estimator.updateWithNewSolution(child)) 
                 s = child;
-            hypervolume = estimator.getNewHypervolumeEstimate();
+            hypervolume = estimator.instrumentedGetNewHypervolumeEstimate();
             if (i%1000 ==0)
                 System.out.println("it: " +i  + ", size: " + estimator.getCurrentParetoSetEstimate().size() + ", hyp: " + hypervolume + ", number samples "+ estimator.getNumberOfSamplesUsedForCurrentEstimate() + ", nanosecs " + (bean.getCurrentThreadCpuTime()-oldTime));
         }

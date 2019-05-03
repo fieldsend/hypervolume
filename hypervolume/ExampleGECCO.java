@@ -83,7 +83,7 @@ public class ExampleGECCO
         int seed = Math.max(1,Integer.parseInt(args[4])); // number of folds
         
         boolean instrumented = Boolean.parseBoolean(args[5]);
-        String details = "_num_objs_" + numberOfObjectives + "_seed_" + seed;
+        String details = "num_objs_" + numberOfObjectives + "_seed_" + seed + "_" +t;
         estimator.setInstrumentationFilenames("hypervolumes_" + details + ".txt", "times_" + details + ".txt");
         
         int dim =  10+numberOfObjectives-1; // get the number of design dimensions depending on problem number
@@ -91,6 +91,8 @@ public class ExampleGECCO
         MonteCarloSolution.setRandomSeed((long) seed);
             
         optimiser.runOptimiser(numberOfObjectives,its,numberOfObjectives,estimator);
+        estimator.writeOutHypervolume();
+        estimator.writeOutTimeInNanoseconds();
         System.out.println("SEED : " + seed);
         System.out.println("COMPLETED");
     }
