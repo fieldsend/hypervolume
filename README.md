@@ -49,11 +49,11 @@ java ExampleGECCO D 100000 50000 8 0 true
 
 Which would use the dynamic MC sampling approach to hypervolume estimation, stopping
 hypervolume improvement estimatation at each iteration once 100000 nanonseconds has been 
-dedicated to the estimation update. The (1+1)--ES optimiser will be run for  100000 
+dedicated to the estimation update. The (1+1)-ES optimiser will be run for  100000 
 generations on the 8-objective problem varient. The seed used is 0 for the evolutionary
 optimiser, and outputs are written to a file.
 
-For more general use, the class functions required are the implementors of the 
+For more general use, the classs required are the implementors of the 
 HypervolumeEstimator interface. In terms of computational efficiency, the real choice
 is between the EfficientIncrementalHypervolumeEstimator class (which limits the number 
 of MC samples to use to refine the estimate each generation) and DynamicHypervolumeEstimator
