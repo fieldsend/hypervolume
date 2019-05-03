@@ -11,7 +11,7 @@ import java.util.Iterator;
 public class IncrementalHypervolumeEstimator extends BasicHypervolumeEstimator
 {
     ArrayList<Solution> nondominatedSamples; // track which samples not yet dominated
-    int hypervolumeSamples = 0; // track how many samples made over time 
+    int hypervolumeSamplesDominated = 0; // track how many samples made over time 
     /**
      * Generates an instance of a HypervolumeEstimator to track the
      * hypervolume for a numberOfObjectives dimensional problem, with the
@@ -44,19 +44,19 @@ public class IncrementalHypervolumeEstimator extends BasicHypervolumeEstimator
     {
         if (nondominatedSamples == null)  // first time called, special case
             return updateFirstTime();
+        
         int toGenerate = Math.max(0,numberOfSamples-nondominatedSamples.size()); // calculate beforehand, as list may change
         int h = compareToStoredList();
         h += generateNewMCSamples(toGenerate); // now generate new MC samples up to limit
-        
-        hypervolume = (1/((double) numberOfSamples + hypervolumeSamples)) * (hypervolumeSamples + h);
-        hypervolumeSamples += toGenerate;
+        hypervolume = (1/((double) numberOfSamples + hypervolumeSamplesDominated)) * (hypervolumeSamplesDominated + h);
+        hypervolumeSamplesDominated += h;
         return hypervolume;
     }
 
     @Override
     public int getNumberOfSamplesUsedForCurrentEstimate()
     {
-        return hypervolumeSamples + numberOfSamples;
+        return hypervolumeSamplesDominated + numberOfSamples;
     }
     
     
@@ -110,7 +110,7 @@ public class IncrementalHypervolumeEstimator extends BasicHypervolumeEstimator
     {
         nondominatedSamples = new ArrayList<>(numberOfSamples); // initial max list length is simply number of samples in an iteration
         int h = generateNewMCSamples(numberOfSamples);
-        hypervolumeSamples = numberOfSamples-nondominatedSamples.size();
+        hypervolumeSamplesDominated = h;
         hypervolume = h/(double) numberOfSamples;    
         return hypervolume;
     }

@@ -28,8 +28,8 @@ public class EfficientIncrementalHypervolumeEstimator extends IncrementalHypervo
         int h = compareToStoredListEfficient();
         h += generateNewMCSamples(toGenerate); // now generate new MC samples up to limit
         
-        hypervolume = (1/((double) numberOfSamples + hypervolumeSamples)) * (hypervolumeSamples + h);
-        hypervolumeSamples += toGenerate;
+        hypervolume = (1/((double) numberOfSamples + hypervolumeSamplesDominated)) * (hypervolumeSamplesDominated + h);
+        hypervolumeSamplesDominated += h;
         return hypervolume;
     }
     

@@ -51,15 +51,15 @@ public class DynamicHypervolumeEstimator extends EfficientIncrementalHypervolume
         int h = compareToStoredListEfficient();
         h += generateNewMCSamples(startTime,nanoseconds); // now generate new MC samples up to time limit
         
-        hypervolumeSamples += h; // update number of MC samples that have been dominated in the history
-        hypervolume = hypervolumeSamples/((double) hypervolumeSamples + nondominatedSamples.size());
+        hypervolumeSamplesDominated += h; // update number of MC samples that have been dominated in the history
+        hypervolume = hypervolumeSamplesDominated/((double) hypervolumeSamplesDominated + nondominatedSamples.size());
         return hypervolume;
     }
     
     @Override
     public int getNumberOfSamplesUsedForCurrentEstimate() 
     {
-        return hypervolumeSamples + nondominatedSamples.size();
+        return hypervolumeSamplesDominated + nondominatedSamples.size();
     }
     
     
@@ -72,8 +72,8 @@ public class DynamicHypervolumeEstimator extends EfficientIncrementalHypervolume
     throws IllegalNumberOfObjectivesException
     {
         nondominatedSamples = new ArrayList<>(100); // initial max list length is arbitrary
-        hypervolumeSamples = generateNewMCSamples(startTime,nanoseconds);
-        hypervolume = hypervolumeSamples/(double) (hypervolumeSamples + nondominatedSamples.size());    
+        hypervolumeSamplesDominated = generateNewMCSamples(startTime,nanoseconds);
+        hypervolume = hypervolumeSamplesDominated/(double) (hypervolumeSamplesDominated + nondominatedSamples.size());    
         return hypervolume;
     }
     
