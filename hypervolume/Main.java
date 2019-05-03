@@ -1,23 +1,31 @@
 import java.util.ArrayList;
 import java.util.Random; 
-import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.File;
 import java.io.PrintWriter;
 import java.util.Iterator; 
 import java.util.ListIterator; 
 import java.lang.management.*;
 
 /**
- * Main class implements and runs experiments detailed in .
+ * Main class implements and runs experiments detailed in.
  * 
  * Jonathan E. Fieldsend. 2019. 
  * Efficient Real-Time Hypervolume Estimation with Monotonically Reducing Error. 
  * In Genetic and Evolutionary Computation Conference (GECCO ’19), 
  * July 13–17, 2019, Prague, Czech Republic. ACM, New York, NY, USA, 
  * 
+ * THIS IS NOW DEPRECATED, AS A REFACTORED VERSION IS AVAILABLE IN:
+ * 
+ * ExampleGECCO.java in the same package
+ * 
+ * which is fully object-oriented and shows use of the HypervolumeEstimator
+ * subtypes (which could be used in other projects)
+ * 
  * @author Jonathan Fieldsend
- * @version 29/04/2019
+ * @version 03/05/2019
  */
+@Deprecated
 public class Main
 {
     private ThreadMXBean bean = ManagementFactory.getThreadMXBean( ); // object to track timings
@@ -80,7 +88,7 @@ public class Main
             t = HypeType.INCREMENTAL_SINGLE;
             break;
             case "D" :
-            t = HypeType.INCREMENTAL_SINGLE;
+            t = HypeType.DYNAMIC;
         }
         if (t==null){
             System.out.println("Using hypervolume update type " + args[1] 

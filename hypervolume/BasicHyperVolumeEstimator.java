@@ -1,3 +1,7 @@
+import java.util.ArrayList;
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.FileNotFoundException;
 
 /**
  * BasicHyperVolumeEstimator.
@@ -9,11 +13,15 @@ public class BasicHypervolumeEstimator implements HypervolumeEstimator
 {
     int numberOfSamples; //number of MC samples to take at each query
     ParetoSetManager list;
-    private boolean instrument = false; 
+    private boolean instrumented = false; 
     double hypervolume = 0.0; // initially don't dominate any hypervolume 
     double[] lowerBounds;
     double[] upperBounds;
-    String filename;
+    String hypervolumeFilename = "estimated_hypervolumes.txt";
+    String timeFilename = "hypervolume_calculation_times_in_nanoseconds.txt";
+    ArrayList<Double> hypervolumeHistory = new ArrayList<>();
+    ArrayList<Long> hypervolumeTimingHistoryInNanoseconds  = new ArrayList<>();
+    long startTime;
     
     /**
      * Generates an instance of BasicHyperVolumeEstimator to track the
@@ -79,6 +87,18 @@ public class BasicHypervolumeEstimator implements HypervolumeEstimator
     }
     
     @Override
+    public double instrumentedGetNewHypervolumeEstimate()
+    throws IllegalNumberOfObjectivesException
+    {
+        logTimeIn();
+        getNewHypervolumeEstimate();
+        logTimeOut();
+        hypervolumeHistory.add(hypervolume);
+        return hypervolume;
+    }
+    
+    
+    @Override
     public double getCurrentHypervolumeEstimate()
     {
         return hypervolume;
@@ -91,34 +111,76 @@ public class BasicHypervolumeEstimator implements HypervolumeEstimator
     }
     
     @Override
-    public void setInstrumented(boolean instrument)
+    public void setInstrumentationFilenames(String hypervolumeFilename, String timeFilename)
     {
-        // if switching instrumentation off, and currently on, then write to file before changing state 
-        if (instrument==false) {
-            this.writeOutFiles(filename);
-        }
-        this.instrument = instrument;
+        this.hypervolumeFilename = hypervolumeFilename;
+        this.timeFilename = timeFilename;
     }
     
     @Override
-    public boolean isInstrumented()
+    public boolean writeOutHypervolume()
+    throws FileNotFoundException
     {
-        return instrument;
-    }
-    
-    @Override
-    public boolean writeOutFiles(String filename)
-    {
-        this.filename = filename;
-        if (instrument == false)
+        if (instrumented == false)
             return false;
-        throw new RuntimeException("writeOutFiles() method still to be implemented");    
+     
+        PrintWriter hypervolumeWriter = new PrintWriter(new File(hypervolumeFilename));
+            
+        StringBuilder sb = new StringBuilder();
+        for (double d : hypervolumeHistory) {
+            sb.append(d);
+            sb.append("\n");
+        }
+        hypervolumeWriter.write(sb.toString());
+        hypervolumeWriter.close();
         
+        // reset tracker
+        hypervolumeHistory = new ArrayList<>();
+        return true;
+    }
+    
+    @Override
+    public boolean writeOutTimeInNanoseconds()
+    throws FileNotFoundException
+    {
+        if (instrumented == false)
+            return false;
+     
+        PrintWriter timeWriter = new PrintWriter(new File(timeFilename));
+            
+        StringBuilder sb = new StringBuilder();
+        for (long t : hypervolumeTimingHistoryInNanoseconds) {
+            sb.append(t);
+            sb.append("\n");
+        }
+        timeWriter.write(sb.toString());
+        timeWriter.close();
+        
+        // reset tracker
+        hypervolumeTimingHistoryInNanoseconds  = new ArrayList<>();
+        return true;
     }
     
     @Override
     public int getNumberOfSamplesUsedForCurrentEstimate()
     {
         return numberOfSamples;
+    }
+    
+    /**
+     * Keeps track of current time
+     */
+    void logTimeIn()
+    {
+        startTime = HypervolumeEstimator.getCPUTime();
+    }
+
+    /**
+     * Tracks difference of current time and time when logTimeIn() was last called
+     * and saves in tracker for latter writing to file
+     */
+    void logTimeOut()
+    {
+        hypervolumeTimingHistoryInNanoseconds.add(HypervolumeEstimator.getCPUTime()-startTime);
     }
 }

@@ -33,6 +33,17 @@ public class EfficientIncrementalHypervolumeEstimator extends IncrementalHypervo
         return hypervolume;
     }
     
+    @Override
+    public double instrumentedGetNewHypervolumeEstimate()
+    throws IllegalNumberOfObjectivesException
+    {
+        logTimeIn();
+        getNewHypervolumeEstimate();
+        logTimeOut();
+        hypervolumeHistory.add(hypervolume);
+        return hypervolume;
+    }
+    
     /**
      * Compares the previously non-dominated solutions to the current
      * Pareto set estimate, return the number dominated (removed from 

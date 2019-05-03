@@ -1,3 +1,7 @@
+import java.lang.management.ThreadMXBean;
+import java.lang.management.ManagementFactory;
+import java.io.FileNotFoundException;
+
 
 /**
  * HypervolumeEstimator provides an interface for all hyervolume
@@ -8,6 +12,8 @@
  */
 public interface HypervolumeEstimator
 {
+    static ThreadMXBean bean = ManagementFactory.getThreadMXBean(); // object to track timings
+    
     /**
      * Method sets number of samples to compare to per iteration
      */
@@ -31,6 +37,19 @@ public interface HypervolumeEstimator
     double getNewHypervolumeEstimate() throws IllegalNumberOfObjectivesException;
     
     /**
+     * Method updates the hypervolume calculation and returns it. It also tracks the value, 
+     * and records how long (in nanoseconds) the computation took, for later writing to 
+     * file of object history
+     */
+    double instrumentedGetNewHypervolumeEstimate() throws IllegalNumberOfObjectivesException;
+    
+    /**
+     * Sets the filenames to be used when writing the hypervolumes and times if instrumented
+     * object used
+     */
+    void setInstrumentationFilenames(String hypervolumeFilename, String timeFilename);
+    
+    /**
      * Method returns the most recently calculated hypervolume estimate (this may be stale
      * if updateWithNewSolution has been called in the intervening period)
      */
@@ -42,25 +61,28 @@ public interface HypervolumeEstimator
     ParetoSetManager getCurrentParetoSetEstimate();
     
     /**
-     * Sets instrumentation. If currently true will write out tracked stats to 
-     * file before switching off tracking
+     * Writes out file tracking hypervolume statistic. Returns true if successful. Will return false
+     * if instrumentation not set to true. Once written out the state tracking object will be reset.
      */
-    void setInstrumented(boolean instrument);
+    boolean writeOutHypervolume() throws FileNotFoundException;
     
     /**
-     * Returns true if this object is instrumented
+     * Writes out file tracking timings in nanoseconds for computing the hypervolume estimate.
+     * Returns true if successful. Will return false
+     * if instrumentation not set to true. Once written out the state tracking object will be reset.
      */
-    boolean isInstrumented();
-    
-    /**
-     * Writes out files tracking statistics. Returns true if successful. Will return false
-     * if instrumentation not set to true.
-     */
-    boolean writeOutFiles(String filename);
+    boolean writeOutTimeInNanoseconds() throws FileNotFoundException;
     
     /**
      * Returns the number of Monte Carlo samples used to create current estimate of the
      * dominated hypervolume
      */
     int getNumberOfSamplesUsedForCurrentEstimate();
+    
+    /**
+     * Get CPU time in nanoseconds. 
+     */
+    static long getCPUTime() {
+        return bean.getCurrentThreadCpuTime();
+    }
 }

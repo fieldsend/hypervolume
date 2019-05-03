@@ -1,5 +1,3 @@
-import java.lang.management.ThreadMXBean;
-import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Iterator; 
 
@@ -18,7 +16,6 @@ import java.util.Iterator;
 public class DynamicHypervolumeEstimator extends EfficientIncrementalHypervolumeEstimator
 {
     private long nanoseconds = 0; // maximum number of time spent on _new_ MC samples
-    private ThreadMXBean bean = ManagementFactory.getThreadMXBean( ); // object to track timings
     
     public DynamicHypervolumeEstimator(int numberOfObjectives, double[] lowerBounds, double[] upperBounds)
     throws IllegalNumberOfObjectivesException
@@ -44,7 +41,7 @@ public class DynamicHypervolumeEstimator extends EfficientIncrementalHypervolume
     public double getNewHypervolumeEstimate()
     throws IllegalNumberOfObjectivesException
     {
-        long startTime = getCPUTime();
+        long startTime = HypervolumeEstimator.getCPUTime();
         if (nondominatedSamples == null) 
             return updateFirstTime(startTime);
         // not first time, so need to compare new entrant to archive  
@@ -62,10 +59,15 @@ public class DynamicHypervolumeEstimator extends EfficientIncrementalHypervolume
         return hypervolumeSamplesDominated + nondominatedSamples.size();
     }
     
-    
-    /* Get CPU time in nanoseconds. */
-    private long getCPUTime( ) {
-        return bean.getCurrentThreadCpuTime( );
+    @Override
+    public double instrumentedGetNewHypervolumeEstimate()
+    throws IllegalNumberOfObjectivesException
+    {
+        logTimeIn();
+        getNewHypervolumeEstimate();
+        logTimeOut();
+        hypervolumeHistory.add(hypervolume);
+        return hypervolume;
     }
     
     private double updateFirstTime(long startTime)
@@ -81,7 +83,7 @@ public class DynamicHypervolumeEstimator extends EfficientIncrementalHypervolume
     throws IllegalNumberOfObjectivesException
     {
         int numberDominated = 0;
-        while (getCPUTime()-startTime < nanoseconds){
+        while (HypervolumeEstimator.getCPUTime()-startTime < nanoseconds){
             MonteCarloSolution s = new MonteCarloSolution(lowerBounds, upperBounds);
             if (list.weaklyDominates(s)){
                 numberDominated++;
