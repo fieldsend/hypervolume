@@ -13,29 +13,44 @@ Institutional Repository: http://hdl.handle.net/10871/36825
 
 Publisher DOI: https://doi.org/10.1145/3321707.3321730
 
-The main class for the experiments is the imaginatively titled Main.java
+The Main.java holds some orginal code, however this has now been deprecated as the 
+codebase has been refactored, and the hypervolume estimator functionality has been pulled 
+into seperate objects to reduce current code duplication, and provide objects directly 
+usable in other projects. The entry point for example usage is now ExampleGECCO.java
 
-After compliation, running the class without arguments will detail what is expected.
+After compliation, running the class without arguments will detail what is expected. 
+The DLTZ2 cost function is used to illustrate in this code
 
 ```
->> java Main
-
-Not enough input arguments, four arguments expected:
- DTLZ problem number (1 OR 2),
- Hypervolume estimate update type  (B, I, S OR D),
+>> java ExampleGECCO 
+Not enough input arguments, six arguments expected:
+ Hypervolume estimate update type (B, I, S OR D),
+ Number of samples compared per new estimate (B, I and S), or max nanoseconds for new samples (D_)
  number of iterations (minimum 0 applied),
  number of objectives (minumum 2 applied) and
- number of folds (minimum 1 appied)
+ seed
+ instrument? (true or false), if true hypervolume and timings are written to a file or each iteration
 ```
 
-An example run would be 
+Some example runs would be 
 
 ```
-java Main 1 B 1000 4 10
+java ExampleGECCO B 5000 100000 3 0 true
 ```
 
-Which would use DTLZ2, the basic MC update (here 5000 samples each iteration, I will make this adjustable in revisions), for 1000 iterations of the (1+1)-ES, in 4 objective dimensions, for 10 folds.
+Which would use the basic MC sampling approach to hypervolume estimation, using 5000 samples 
+per iteration of the (1+1)--ES optimiser for 100000 generations on the 3-objective problem 
+varient. The seed used is 0 for evolutionary optimiser, and outputs are written to a file.
 
-Note, I will be making the codebase a bit more object-oriented in the run-up to GECCO by pulling out the hypervolume estimator functionality into seperate objects to reduce current code duplication, and provide objects directly usable in other projects
+
+```
+java ExampleGECCO D 100000 50000 8 0 true
+```
+
+Which would use the dynamic MC sampling approach to hypervolume estimation, stopping
+hypervolume improvement estimatation at each iteration once 100000 nanonseconds has been 
+dedicated to the estimation update. The (1+1)--ES optimiser will be run for  100000 
+generations on the 8-objective problem varient. The seed used is 0 for evolutionary
+optimiser, and outputs are written to a file.
 
 
