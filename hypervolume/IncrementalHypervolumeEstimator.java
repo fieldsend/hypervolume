@@ -56,7 +56,7 @@ public class IncrementalHypervolumeEstimator extends BasicHypervolumeEstimator
     @Override
     public int getNumberOfSamplesUsedForCurrentEstimate()
     {
-        return numberOfSamples + numberOfSamples;
+        return hypervolumeSamples + numberOfSamples;
     }
     
     

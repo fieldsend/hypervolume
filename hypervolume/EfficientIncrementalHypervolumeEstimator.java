@@ -43,7 +43,7 @@ public class EfficientIncrementalHypervolumeEstimator extends IncrementalHypervo
     {
         int numberDominated = 0;
         if (improvingEntrant != null) {
-            // first iterate over samples which haven't been dominated in pervious iterations
+            // first iterate over samples which haven't been dominated in previous iterations
             Iterator<Solution> itr = nondominatedSamples.iterator();
             while (itr.hasNext()) {
                 Solution s  = itr.next();
@@ -56,6 +56,7 @@ public class EfficientIncrementalHypervolumeEstimator extends IncrementalHypervo
         return numberDominated;
     }
     
+    @Override
     public boolean updateWithNewSolution(Solution s)
     throws IllegalNumberOfObjectivesException
     {

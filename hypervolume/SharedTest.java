@@ -13,7 +13,8 @@ import java.util.Collection;
  */
 public class SharedTest
 {
-    public static void exampleRun(HypervolumeEstimator estimator1, HypervolumeEstimator estimator2, Random rng, int numberOfObjectives, int numberOfQueries) 
+    
+    public static HypervolumeEstimator[] exampleRandomRun(HypervolumeEstimator[] estimators, Random rng, int numberOfObjectives, int numberOfQueries) 
     throws IllegalNumberOfObjectivesException {
 
         for (int i=0; i<numberOfQueries; i++){
@@ -28,21 +29,44 @@ public class SharedTest
 
             System.out.println();*/
             //System.out.println(toAdd[0]+ "  " + toAdd[1]);
-            System.out.println("Test manager 1 added "+estimator1.updateWithNewSolution(new ProxySolution(toAdd)));
-            System.out.println("Manager size: " + estimator1.getCurrentParetoSetEstimate().size());
+            for (HypervolumeEstimator estimator : estimators){
+                System.out.println("Added "+estimator.updateWithNewSolution(new ProxySolution(toAdd)));
+                System.out.println("Manager size: " + estimator.getCurrentParetoSetEstimate().size());
+            }
+            Collection<? extends Solution> set1 = estimators[0].getCurrentParetoSetEstimate().getContents();
+            HypervolumeEstimator e0 = estimators[0];
+            for (HypervolumeEstimator estimator : estimators){
+                Collection<? extends Solution> set2 = estimator.getCurrentParetoSetEstimate().getContents();
+                assertTrue(e0.getCurrentParetoSetEstimate().size()==estimator.getCurrentParetoSetEstimate().size());
+                assertTrue(set1.size()==set2.size());
+                assertTrue(set2.containsAll(set1));
+                assertTrue(set1.containsAll(set2));
+            }
+        }
+        System.out.println(estimators[0].getCurrentParetoSetEstimate().size());
+        return estimators;
+    }
+
+    public static HypervolumeEstimator[] exampleEvolvingRun(HypervolumeEstimator[] estimators, long seed, int numberOfObjectives, int numberOfQueries) 
+    throws IllegalNumberOfObjectivesException {
+        for (HypervolumeEstimator estimator : estimators) {
+            OnePlusOneES optimiser = new OnePlusOneES(seed);
+            MonteCarloSolution.setRandomSeed(0L);
+            optimiser.runOptimiser(numberOfObjectives,numberOfQueries,numberOfObjectives,estimator);
+        }
+        Collection<? extends Solution> set1 = estimators[0].getCurrentParetoSetEstimate().getContents();
+        HypervolumeEstimator e0 = estimators[0];
             
-            System.out.println("Test manager 2 added "+estimator2.updateWithNewSolution(new ProxySolution(toAdd)));
-            System.out.println("Manager size: " + estimator2.getCurrentParetoSetEstimate().size());
-            
-            Collection<? extends Solution> set1 = estimator1.getCurrentParetoSetEstimate().getContents();
-            Collection<? extends Solution> set2 = estimator2.getCurrentParetoSetEstimate().getContents();
-            
-            assertTrue(estimator2.getCurrentParetoSetEstimate().size()==estimator1.getCurrentParetoSetEstimate().size());
+        for (HypervolumeEstimator estimator : estimators){
+            Collection<? extends Solution> set2 = estimator.getCurrentParetoSetEstimate().getContents();
+            assertTrue(e0.getCurrentParetoSetEstimate().size()==estimator.getCurrentParetoSetEstimate().size());
             assertTrue(set1.size()==set2.size());
             assertTrue(set2.containsAll(set1));
             assertTrue(set1.containsAll(set2));
         }
-        System.out.println(estimator1.getCurrentParetoSetEstimate().size());
+        System.out.println(estimators[0].getCurrentParetoSetEstimate().size());
+        
+        return estimators;
     }
 
     private static class ProxySolution implements Solution

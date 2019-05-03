@@ -14,6 +14,8 @@ import java.util.Random;
  */
 public class BasicHypervolumeEstimatorTest
 {
+    long maxTime = 100000L;
+    
     /**
      * Default constructor for test class BasicHypervolumeEstimatorTest
      */
@@ -43,7 +45,7 @@ public class BasicHypervolumeEstimatorTest
     
     
     @Test(timeout=200000)
-    public void exampleRun()
+    public void exampleRandomRun()
     throws IllegalNumberOfObjectivesException {
         int numberOfObjectives = 2;
         double[] lowerBounds = new double[ numberOfObjectives];
@@ -53,12 +55,43 @@ public class BasicHypervolumeEstimatorTest
             lowerBounds[i] = 0.0;
             upperBounds[i] = 2.0;
         }
-        HypervolumeEstimator estimator1 = new BasicHypervolumeEstimator(numberOfObjectives, lowerBounds, upperBounds);
-        HypervolumeEstimator estimator2 = new IncrementalHypervolumeEstimator(numberOfObjectives, lowerBounds, upperBounds);
-        estimator1.setNumberOfSamplesToComparePerIteration(5000);
-        estimator2.setNumberOfSamplesToComparePerIteration(5000);
+        HypervolumeEstimator estimator[] = new HypervolumeEstimator[4];
+        estimator[0] = new BasicHypervolumeEstimator(numberOfObjectives, lowerBounds, upperBounds);
+        estimator[1] = new IncrementalHypervolumeEstimator(numberOfObjectives, lowerBounds, upperBounds);
+        estimator[2] = new EfficientIncrementalHypervolumeEstimator(numberOfObjectives, lowerBounds, upperBounds);
+        estimator[3] = new DynamicHypervolumeEstimator(numberOfObjectives, lowerBounds, upperBounds);
         
         
-        SharedTest.exampleRun(estimator1,estimator2,new Random(0L),numberOfObjectives,1000);      
+        estimator[0].setNumberOfSamplesToComparePerIteration(5000);
+        estimator[1].setNumberOfSamplesToComparePerIteration(5000);
+        estimator[2].setNumberOfSamplesToComparePerIteration(5000);
+        estimator[3].setTimeLimit(maxTime);
+        SharedTest.exampleRandomRun(estimator,new Random(0L),numberOfObjectives,10000);      
     }
+    
+    @Test(timeout=200000)
+    public void exampleEvolvingRun()
+    throws IllegalNumberOfObjectivesException {
+        int numberOfObjectives = 2;
+        double[] lowerBounds = new double[ numberOfObjectives];
+        double[] upperBounds = new double[ numberOfObjectives];
+        // set box contstraints for MC sampling of objective vectors
+        for (int i=0; i<numberOfObjectives; i++) {
+            lowerBounds[i] = 0.0;
+            upperBounds[i] = 2.0;
+        }
+        HypervolumeEstimator estimator[] = new HypervolumeEstimator[4];
+        estimator[0] = new BasicHypervolumeEstimator(numberOfObjectives, lowerBounds, upperBounds);
+        estimator[1] = new IncrementalHypervolumeEstimator(numberOfObjectives, lowerBounds, upperBounds);
+        estimator[2] = new EfficientIncrementalHypervolumeEstimator(numberOfObjectives, lowerBounds, upperBounds);
+        estimator[3] = new DynamicHypervolumeEstimator(numberOfObjectives, lowerBounds, upperBounds);
+        
+        
+        estimator[0].setNumberOfSamplesToComparePerIteration(5000);
+        estimator[1].setNumberOfSamplesToComparePerIteration(5000);
+        estimator[2].setNumberOfSamplesToComparePerIteration(5000);
+        estimator[3].setTimeLimit(maxTime);
+        SharedTest.exampleEvolvingRun(estimator,0L,numberOfObjectives,10000);      
+    }
+    
 }

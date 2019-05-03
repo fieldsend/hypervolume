@@ -10,7 +10,7 @@ import java.util.Random;
 public class MonteCarloSolution implements Solution
 {
     private double[] fitnesses;
-    private static Random rng;
+    private static Random rng = new Random(0L);
 
     /**
      * MonteCarloSolution implements the Solution class to represent a random

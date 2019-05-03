@@ -23,11 +23,11 @@ public class OnePlusOneES
     /**
      * runs optimiser on problem for given number of generations
      */
-    void runOptimiser(int problem, int iterations, int numberOfObjectives, HypervolumeEstimator estimator) 
+    HypervolumeEstimator runOptimiser(int problem, int iterations, int numberOfObjectives, HypervolumeEstimator estimator) 
     throws IllegalNumberOfObjectivesException
     {
         // initial point
-        int numberOfDesignVariables = (problem ==1) ? 5+numberOfObjectives-1 : 10+numberOfObjectives-1;
+        int numberOfDesignVariables = (problem == 1) ? 5+numberOfObjectives-1 : 10+numberOfObjectives-1;
         DTLZSolution s = new DTLZSolution(numberOfObjectives, numberOfDesignVariables);
         evaluate(problem,s);
         estimator.updateWithNewSolution(s);
@@ -38,21 +38,20 @@ public class OnePlusOneES
         for (int i=1; i<iterations; i++) {
             DTLZSolution child = evolve(s);
             evaluate(problem,child);
-            if (estimator.updateWithNewSolution(s)) 
+            if (estimator.updateWithNewSolution(child)) 
                 s = child;
-            
             hypervolume = estimator.getNewHypervolumeEstimate();
             if (i%1000 ==0)
-                System.out.println("it: " +i  + ", size: " + estimator.getCurrentParetoSetEstimate().size() + ", hyp: " + hypervolume + ", nanosecs " + (bean.getCurrentThreadCpuTime()-oldTime));
+                System.out.println("it: " +i  + ", size: " + estimator.getCurrentParetoSetEstimate().size() + ", hyp: " + hypervolume + ", number samples "+ estimator.getNumberOfSamplesUsedForCurrentEstimate() + ", nanosecs " + (bean.getCurrentThreadCpuTime()-oldTime));
         }
-        
+        return estimator;
     }
     
     /*
      * Method evaluate solutioon argument under either the DTLZ1 or DTLZ2 problem
      */
-    private void evaluate(int problem,DTLZSolution s) {
-        if (problem ==1)
+    private void evaluate(int problem, DTLZSolution s) {
+        if (problem == 1)
             DTLZ1(s);
         else
             DTLZ2(s);
@@ -69,7 +68,7 @@ public class OnePlusOneES
         do {
             child.designVariables[dimension] = s.designVariables[dimension];
             child.designVariables[dimension] += rng.nextGaussian()*0.1;
-        } while ((child.designVariables[dimension] <0.0) || (child.designVariables[dimension]>1.0));
+        } while ((child.designVariables[dimension] < 0.0) || (child.designVariables[dimension] > 1.0));
 
         return child;
     }
