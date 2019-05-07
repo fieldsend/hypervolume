@@ -4,17 +4,18 @@ import static org.junit.Assert.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import java.util.Random;
+
 
 /**
  * The test class BasicHypervolumeEstimatorTest.
  *
- * @author  (your name)
- * @version (a version number or a date)
+ * Class provides tests for BasicHypervolumeEstimator class.
+ *
+ * @author  Jonathan Fieldsend
+ * @version 07/05/2019
  */
 public class BasicHypervolumeEstimatorTest
 {
-    long maxTime = 100000L;
     
     /**
      * Default constructor for test class BasicHypervolumeEstimatorTest
@@ -43,55 +44,52 @@ public class BasicHypervolumeEstimatorTest
     {
     }
     
-    
     @Test(timeout=200000)
-    public void exampleRandomRun()
-    throws IllegalNumberOfObjectivesException {
-        int numberOfObjectives = 2;
-        double[] lowerBounds = new double[ numberOfObjectives];
-        double[] upperBounds = new double[ numberOfObjectives];
-        // set box contstraints for MC sampling of objective vectors
-        for (int i=0; i<numberOfObjectives; i++) {
-            lowerBounds[i] = 0.0;
-            upperBounds[i] = 2.0;
-        }
-        HypervolumeEstimator estimator[] = new HypervolumeEstimator[4];
-        estimator[0] = new BasicHypervolumeEstimator(numberOfObjectives, lowerBounds, upperBounds);
-        estimator[1] = new IncrementalHypervolumeEstimator(numberOfObjectives, lowerBounds, upperBounds);
-        estimator[2] = new EfficientIncrementalHypervolumeEstimator(numberOfObjectives, lowerBounds, upperBounds);
-        estimator[3] = new DynamicHypervolumeEstimator(numberOfObjectives, lowerBounds, upperBounds);
-        
-        
-        estimator[0].setNumberOfSamplesToComparePerIteration(5000);
-        estimator[1].setNumberOfSamplesToComparePerIteration(5000);
-        estimator[2].setNumberOfSamplesToComparePerIteration(5000);
-        estimator[3].setTimeLimit(maxTime);
-        SharedTest.exampleRandomRun(estimator,new Random(0L),numberOfObjectives,10000);      
+    public void setNumberOfSamplesToComparePerIterationTest()
+    {
+    
     }
     
     @Test(timeout=200000)
-    public void exampleEvolvingRun()
-    throws IllegalNumberOfObjectivesException {
-        int numberOfObjectives = 2;
-        double[] lowerBounds = new double[ numberOfObjectives];
-        double[] upperBounds = new double[ numberOfObjectives];
-        // set box contstraints for MC sampling of objective vectors
-        for (int i=0; i<numberOfObjectives; i++) {
-            lowerBounds[i] = 0.0;
-            upperBounds[i] = 2.0;
-        }
-        HypervolumeEstimator estimator[] = new HypervolumeEstimator[4];
-        estimator[0] = new BasicHypervolumeEstimator(numberOfObjectives, lowerBounds, upperBounds);
-        estimator[1] = new IncrementalHypervolumeEstimator(numberOfObjectives, lowerBounds, upperBounds);
-        estimator[2] = new EfficientIncrementalHypervolumeEstimator(numberOfObjectives, lowerBounds, upperBounds);
-        estimator[3] = new DynamicHypervolumeEstimator(numberOfObjectives, lowerBounds, upperBounds);
-        
-        
-        estimator[0].setNumberOfSamplesToComparePerIteration(5000);
-        estimator[1].setNumberOfSamplesToComparePerIteration(5000);
-        estimator[2].setNumberOfSamplesToComparePerIteration(5000);
-        estimator[3].setTimeLimit(maxTime);
-        SharedTest.exampleEvolvingRun(estimator,0L,numberOfObjectives,10000);      
+    public void setTimeLimitTest()
+    {
+    
+    }
+
+    @Test(timeout=200000)
+    public void getNewHypervolumeEstimateTest()
+    {
+    
+    }
+    
+    @Test(timeout=200000)
+    public void instrumentedGetNewHypervolumeEstimateTest()
+    {
+    
+    }
+    
+    @Test(timeout=200000)
+    public void getCurrentHypervolumeEstimateTest()
+    {
+    
+    }
+    
+    @Test(timeout=200000)
+    public void getCurrentParetoSetEstimateTest()
+    {
+    
+    }
+    
+    @Test(timeout=200000)
+    public void setInstrumentationFilenamesTest()
+    {
+    
+    }
+    
+    @Test(timeout=200000)
+    public void getNumberOfSamplesUsedForCurrentEstimateTest()
+    {
+    
     }
     
 }
