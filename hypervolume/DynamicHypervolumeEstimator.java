@@ -34,7 +34,7 @@ public class DynamicHypervolumeEstimator extends EfficientIncrementalHypervolume
     public void setTimeLimit(long nanoseconds) 
     throws UnsupportedOperationException
     {
-        this.nanoseconds = nanoseconds;
+        this.nanoseconds = Math.max(1,nanoseconds);
     }
     
     @Override

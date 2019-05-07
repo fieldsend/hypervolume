@@ -56,7 +56,7 @@ public class BasicHypervolumeEstimator implements HypervolumeEstimator
     public void setNumberOfSamplesToComparePerIteration(int numberOfSamples) 
     throws UnsupportedOperationException
     {
-        this.numberOfSamples = numberOfSamples;
+        this.numberOfSamples = Math.max(numberOfSamples,1);
     }
     
     @Override

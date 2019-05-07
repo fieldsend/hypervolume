@@ -8,19 +8,19 @@ import java.io.FileNotFoundException;
  * estimation objects.
  * 
  * @author Jonathan Fieldsend 
- * @version 02/05/2019
+ * @version 07/05/2019
  */
 public interface HypervolumeEstimator
 {
     static ThreadMXBean bean = ManagementFactory.getThreadMXBean(); // object to track timings
     
     /**
-     * Method sets number of samples to compare to per iteration
+     * Method sets number of samples to compare to per iteration -- enforces minumum of 1 sample
      */
     void setNumberOfSamplesToComparePerIteration(int numberOfSamples) throws UnsupportedOperationException; 
     
     /**
-     * Method sets number of time limit per iteration
+     * Method sets number of time limit per iteration -- enforces minumum of 1 nanosecond
      */
     void setTimeLimit(long nanoseconds) throws UnsupportedOperationException;
     

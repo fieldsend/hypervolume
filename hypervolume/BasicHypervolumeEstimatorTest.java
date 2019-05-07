@@ -16,7 +16,7 @@ import org.junit.Test;
  */
 public class BasicHypervolumeEstimatorTest
 {
-    
+    BasicHypervolumeEstimator estimator;
     /**
      * Default constructor for test class BasicHypervolumeEstimatorTest
      */
@@ -30,8 +30,18 @@ public class BasicHypervolumeEstimatorTest
      * Called before every test case method.
      */
     @Before
-    public void setUp()
+    public void setUp() 
+    throws IllegalNumberOfObjectivesException 
     {
+        int numberOfObjectives = 2;
+        double[] lowerBounds = new double[ numberOfObjectives];
+        double[] upperBounds = new double[ numberOfObjectives];
+        // set box contstraints for MC sampling of objective vectors
+        for (int i=0; i<numberOfObjectives; i++) {
+            lowerBounds[i] = 0.0;
+            upperBounds[i] = 2.0;
+        }
+        estimator = new BasicHypervolumeEstimator(numberOfObjectives, lowerBounds, upperBounds);
     }
 
     /**
@@ -42,18 +52,22 @@ public class BasicHypervolumeEstimatorTest
     @After
     public void tearDown()
     {
+        estimator = null;
     }
     
     @Test(timeout=200000)
     public void setNumberOfSamplesToComparePerIterationTest()
     {
-    
+        estimator.setNumberOfSamplesToComparePerIteration(1000);
+        assertEquals(estimator.numberOfSamples,1000);
+        estimator.setNumberOfSamplesToComparePerIteration(0);
+        assertEquals(estimator.numberOfSamples,1);
     }
     
-    @Test(timeout=200000)
+    @Test(timeout=200000, expected = UnsupportedOperationException.class)
     public void setTimeLimitTest()
     {
-    
+        estimator.setTimeLimit((long) 1000);
     }
 
     @Test(timeout=200000)
@@ -71,13 +85,13 @@ public class BasicHypervolumeEstimatorTest
     @Test(timeout=200000)
     public void getCurrentHypervolumeEstimateTest()
     {
-    
+        assertEquals(estimator.getCurrentHypervolumeEstimate(),0.0,0.0);
     }
     
     @Test(timeout=200000)
     public void getCurrentParetoSetEstimateTest()
     {
-    
+        assertEquals(estimator.getCurrentParetoSetEstimate().size(),0);
     }
     
     @Test(timeout=200000)
@@ -89,7 +103,9 @@ public class BasicHypervolumeEstimatorTest
     @Test(timeout=200000)
     public void getNumberOfSamplesUsedForCurrentEstimateTest()
     {
-    
+        assertEquals(estimator.getNumberOfSamplesUsedForCurrentEstimate(),0);
     }
+    
+    
     
 }
