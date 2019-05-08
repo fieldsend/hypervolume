@@ -1,4 +1,4 @@
-
+package hypervolume;
 
 import static org.junit.Assert.*;
 import org.junit.After;
@@ -105,7 +105,5 @@ public class BasicHypervolumeEstimatorTest
     {
         assertEquals(estimator.getNumberOfSamplesUsedForCurrentEstimate(),0);
     }
-    
-    
     
 }

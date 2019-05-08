@@ -1,3 +1,5 @@
+package hypervolume;
+
 import java.util.ArrayList;
 /**
  * Minimial interface for Solution to be manipulated by the data structures.

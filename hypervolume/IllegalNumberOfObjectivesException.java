@@ -1,3 +1,4 @@
+package hypervolume;
 
 /**
  * IllegalNumberOfObjectives hold details when the number of objectives of an

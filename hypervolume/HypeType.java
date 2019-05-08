@@ -1,3 +1,4 @@
+package hypervolume;
 
 /**
  * Enumeration class HypeType - different types of estimated hypervolume update

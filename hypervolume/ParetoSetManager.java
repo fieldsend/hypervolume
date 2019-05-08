@@ -1,3 +1,5 @@
+package hypervolume;
+
 import java.util.Collection;
 
 /**
