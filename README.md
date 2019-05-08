@@ -35,7 +35,7 @@ Not enough input arguments, six arguments expected:
 Some example runs would be 
 
 ```
-java ExampleGECCO B 5000 100000 3 0 true
+java hypervolume.ExampleGECCO B 5000 100000 3 0 true
 ```
 
 Which would use the basic MC sampling approach to hypervolume estimation, using 5000 samples 
@@ -44,7 +44,7 @@ varient. The seed used is 0 for the evolutionary optimiser, and outputs are writ
 
 
 ```
-java ExampleGECCO D 100000 50000 8 0 true
+java hypervolume.ExampleGECCO D 100000 50000 8 0 true
 ```
 
 Which would use the dynamic MC sampling approach to hypervolume estimation, stopping
