@@ -22,7 +22,7 @@ After compliation, running the class without arguments will detail what is expec
 The DLTZ2 cost function is used to illustrate in this code
 
 ```
->> java ExampleGECCO 
+>> java hypervolume.ExampleGECCO 
 Not enough input arguments, six arguments expected:
  Hypervolume estimate update type (B, I, S OR D),
  Number of samples compared per new estimate (B, I and S), or max nanoseconds for new samples (D_)
