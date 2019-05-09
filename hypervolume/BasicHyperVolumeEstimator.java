@@ -9,7 +9,7 @@ import java.io.FileNotFoundException;
  * BasicHyperVolumeEstimator.
  * 
  * @author Jonathan Fieldsend 
- * @version 02/05/2019
+ * @version 09/05/2019
  */
 public class BasicHypervolumeEstimator implements HypervolumeEstimator
 {
@@ -23,6 +23,7 @@ public class BasicHypervolumeEstimator implements HypervolumeEstimator
     ArrayList<Double> hypervolumeHistory = new ArrayList<>();
     ArrayList<Long> hypervolumeTimingHistoryInNanoseconds  = new ArrayList<>();
     long startTime;
+    boolean lastUpdateNondominated = false;
     
     /**
      * Generates an instance of BasicHyperVolumeEstimator to track the
@@ -72,7 +73,8 @@ public class BasicHypervolumeEstimator implements HypervolumeEstimator
     public boolean updateWithNewSolution(Solution s)
     throws IllegalNumberOfObjectivesException
     {
-        return list.add(s);
+        lastUpdateNondominated = list.add(s);
+        return lastUpdateNondominated;
     }
     
     @Override
@@ -158,6 +160,12 @@ public class BasicHypervolumeEstimator implements HypervolumeEstimator
     public int getNumberOfSamplesUsedForCurrentEstimate()
     {
         return numberOfSamples;
+    }
+    
+    @Override
+    public boolean isMostRecentUpdateNondominated()
+    {
+        return lastUpdateNondominated;
     }
     
     /**

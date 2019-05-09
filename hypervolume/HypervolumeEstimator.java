@@ -10,7 +10,7 @@ import java.io.FileNotFoundException;
  * estimation objects.
  * 
  * @author Jonathan Fieldsend 
- * @version 07/05/2019
+ * @version 09/05/2019
  */
 public interface HypervolumeEstimator
 {
@@ -78,6 +78,22 @@ public interface HypervolumeEstimator
      * dominated hypervolume
      */
     int getNumberOfSamplesUsedForCurrentEstimate();
+    
+    /**
+     * Method returns true if the most recent solution passed into the estimator to be 
+     * compared to and update the archive was not dominated
+     */
+    boolean isMostRecentUpdateNondominated();
+    
+    /**
+     * Archive is updated with new solution, and hypervolume reestimated and returned
+     */
+    default double updateAndReestimateHypervolume(Solution s) 
+    throws IllegalNumberOfObjectivesException 
+    {
+        updateWithNewSolution(s);
+        return getNewHypervolumeEstimate();
+    }
     
     /**
      * Get CPU time in nanoseconds. 
