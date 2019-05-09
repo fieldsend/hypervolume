@@ -13,12 +13,28 @@ import java.util.Iterator;
  * and conducts these until the limit is reached
  * 
  * @author Jonathan Fieldsend 
- * @version 02/05/2019
+ * @version 09/05/2019
  */
 public class DynamicHypervolumeEstimator extends EfficientIncrementalHypervolumeEstimator
 {
     private long nanoseconds = 0; // maximum number of time spent on _new_ MC samples
     
+    /**
+     * Generates an instance of a DynamicHypervolumeEstimator to track the
+     * hypervolume for a numberOfObjectives dimensional problem, with the
+     * hypervolume estimated by Monte Carlo samples from the box constrained
+     * hyperrectangle defined in objective space by lowerBounds and upperBounds, and
+     * through tracking history of dominated samples 
+     * 
+     * Instance initially has instrumentation switched off.
+     * 
+     *  @param numberOfObjectives number of objectives
+     *  @param lowerBounds array of values of lower bound for objectives for MC sampling
+     *  @param upperBounds array of values of upper bound for objectives for MC sampling
+     *  @throws IllegalNumberOfObjectivesException if the length of a bounds array does 
+     *          not match the number of objectives, or if the number of objectives is 
+     *          less than 1 (see message in exception)
+     */
     public DynamicHypervolumeEstimator(int numberOfObjectives, double[] lowerBounds, double[] upperBounds)
     throws IllegalNumberOfObjectivesException
     {
@@ -95,6 +111,4 @@ public class DynamicHypervolumeEstimator extends EfficientIncrementalHypervolume
         }
         return numberDominated;
     }
-    
-    
 }

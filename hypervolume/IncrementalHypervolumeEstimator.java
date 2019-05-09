@@ -8,14 +8,14 @@ import java.util.Iterator;
  * improve hypervolume estimation over time.
  * 
  * @author Jonathan Fieldsend 
- * @version 02/05/2019
+ * @version 09/05/2019
  */
 public class IncrementalHypervolumeEstimator extends BasicHypervolumeEstimator
 {
     ArrayList<Solution> nondominatedSamples; // track which samples not yet dominated
     int hypervolumeSamplesDominated = 0; // track how many samples made over time 
     /**
-     * Generates an instance of a HypervolumeEstimator to track the
+     * Generates an instance of a IncrementalHypervolumeEstimator to track the
      * hypervolume for a numberOfObjectives dimensional problem, with the
      * hypervolume estimated by Monte Carlo samples from the box constrained
      * hyperrectangle defined in objective space by lowerBounds and upperBounds, and

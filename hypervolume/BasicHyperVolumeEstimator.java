@@ -24,7 +24,7 @@ public class BasicHypervolumeEstimator implements HypervolumeEstimator
     ArrayList<Long> hypervolumeTimingHistoryInNanoseconds  = new ArrayList<>();
     long startTime;
     boolean lastUpdateNondominated = false;
-    
+
     /**
      * Generates an instance of BasicHyperVolumeEstimator to track the
      * hypervolume for a numberOfObjectives dimensional problem, with the
@@ -53,22 +53,21 @@ public class BasicHypervolumeEstimator implements HypervolumeEstimator
         this.lowerBounds = lowerBounds;
         this.upperBounds = upperBounds;
     }
-    
-    
+
     @Override
     public void setNumberOfSamplesToComparePerIteration(int numberOfSamples) 
     throws UnsupportedOperationException
     {
         this.numberOfSamples = Math.max(numberOfSamples,1);
     }
-    
+
     @Override
     public void setTimeLimit(long nanoseconds) 
     throws UnsupportedOperationException
     {
         throw new UnsupportedOperationException("BasicHyperVolumeEstimators are defined in terms of samples per iteration, not time");
     }
-    
+
     @Override
     public boolean updateWithNewSolution(Solution s)
     throws IllegalNumberOfObjectivesException
@@ -76,7 +75,7 @@ public class BasicHypervolumeEstimator implements HypervolumeEstimator
         lastUpdateNondominated = list.add(s);
         return lastUpdateNondominated;
     }
-    
+
     @Override
     public double getNewHypervolumeEstimate()
     throws IllegalNumberOfObjectivesException
@@ -88,7 +87,7 @@ public class BasicHypervolumeEstimator implements HypervolumeEstimator
         hypervolume = h/(double) numberOfSamples;
         return hypervolume;
     }
-    
+
     @Override
     public double instrumentedGetNewHypervolumeEstimate()
     throws IllegalNumberOfObjectivesException
@@ -99,33 +98,32 @@ public class BasicHypervolumeEstimator implements HypervolumeEstimator
         hypervolumeHistory.add(hypervolume);
         return hypervolume;
     }
-    
-    
+
     @Override
     public double getCurrentHypervolumeEstimate()
     {
         return hypervolume;
     }
-    
+
     @Override
     public ParetoSetManager getCurrentParetoSetEstimate()
     {
         return list;
     }
-    
+
     @Override
     public void setInstrumentationFilenames(String hypervolumeFilename, String timeFilename)
     {
         this.hypervolumeFilename = hypervolumeFilename;
         this.timeFilename = timeFilename;
     }
-    
+
     @Override
     public void writeOutHypervolume()
     throws FileNotFoundException
     {
         PrintWriter hypervolumeWriter = new PrintWriter(new File(hypervolumeFilename));
-            
+
         StringBuilder sb = new StringBuilder();
         for (double d : hypervolumeHistory) {
             sb.append(d);
@@ -133,17 +131,17 @@ public class BasicHypervolumeEstimator implements HypervolumeEstimator
         }
         hypervolumeWriter.write(sb.toString());
         hypervolumeWriter.close();
-        
+
         // reset tracker
         hypervolumeHistory = new ArrayList<>();
     }
-    
+
     @Override
     public void writeOutTimeInNanoseconds()
     throws FileNotFoundException
     {
         PrintWriter timeWriter = new PrintWriter(new File(timeFilename));
-            
+
         StringBuilder sb = new StringBuilder();
         for (long t : hypervolumeTimingHistoryInNanoseconds) {
             sb.append(t);
@@ -151,23 +149,23 @@ public class BasicHypervolumeEstimator implements HypervolumeEstimator
         }
         timeWriter.write(sb.toString());
         timeWriter.close();
-        
+
         // reset tracker
         hypervolumeTimingHistoryInNanoseconds  = new ArrayList<>();
     }
-    
+
     @Override
     public int getNumberOfSamplesUsedForCurrentEstimate()
     {
         return numberOfSamples;
     }
-    
+
     @Override
     public boolean isMostRecentUpdateNondominated()
     {
         return lastUpdateNondominated;
     }
-    
+
     /**
      * Keeps track of current time
      */
